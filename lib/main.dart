@@ -51,20 +51,21 @@ class _ExampleAppState extends State<ExampleApp> {
               for (final address in availablePorts)
                 Builder(builder: (context) {
                   // final port = SerialPort(address);
-                  return ExpansionTile(
+                  return ListTile(
                     title: Text(address),
-                    // children: [
-                    //   CardListTile('Description', port.description),
-                    //   CardListTile('Transport', port.transport.toTransport()),
-                    //   CardListTile('USB Bus', port.busNumber?.toPadded()),
-                    //   CardListTile('USB Device', port.deviceNumber?.toPadded()),
-                    //   CardListTile('Vendor ID', port.vendorId?.toHex()),
-                    //   CardListTile('Product ID', port.productId?.toHex()),
-                    //   CardListTile('Manufacturer', port.manufacturer),
-                    //   CardListTile('Product Name', port.productName),
-                    //   CardListTile('Serial Number', port.serialNumber),
-                    //   CardListTile('MAC Address', port.macAddress),
-                    // ],
+                    onTap: () {
+                      final port = SerialPort(address);
+                      port.openRead();
+                      print(port.description);
+                      //print(port.busNumber?.toPadded());
+                      //print(port.deviceNumber?.toPadded());
+                      //print(port.vendorId?.toHex());
+                      //print(port.productId?.toHex());
+                      print(port.manufacturer);
+                      print(port.productName);
+                      print(port.serialNumber);
+                      print(port.macAddress);
+                    },
                   );
                 }),
             ],
