@@ -59,8 +59,8 @@ class _ExampleAppState extends State<ExampleApp> {
                       print(port.description);
                       //print(port.busNumber?.toPadded());
                       //print(port.deviceNumber?.toPadded());
-                      //print(port.vendorId?.toHex());
-                      //print(port.productId?.toHex());
+                      print(port.vendorId?.toHex());
+                      print(port.productId?.toHex());
                       print(port.manufacturer);
                       print(port.productName);
                       print(port.serialNumber);
