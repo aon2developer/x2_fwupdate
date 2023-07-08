@@ -13,28 +13,35 @@ class DeviceList extends ConsumerStatefulWidget {
 class _DeviceListState extends ConsumerState<DeviceList> {
   @override
   Widget build(BuildContext context) {
-    final availablePorts = ref.watch(devicesProvider);
-    print(availablePorts);
+    final availableDevices = ref.watch(devicesProvider);
+    print(availableDevices);
 
     return SingleChildScrollView(
-      child: Column(
-        children: [
-          for (final address in availablePorts)
-            Builder(builder: (context) {
-              // final port = SerialPort(address);
-              return ListTile(
-                title: Text(
-                  address,
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                        color: Colors.white,
-                      ),
-                ),
-                onTap: () {
-                  print('Selected $address');
-                },
-              );
-            }),
-        ],
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[850],
+        ),
+        child: Column(
+          children: [
+            for (final device in availableDevices)
+              Builder(builder: (context) {
+                // final port = SerialPort(address);
+                return ListTile(
+                  title: Text(
+                    '${device.description} by ${device.manufacturer}',
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          color: Colors.white,
+                        ),
+                  ),
+                  onTap: () {
+                    print('Selected: ${device.description}');
+                    print('Product id: ${device.productId ?? 'N/A'}');
+                    print('Vendor id: ${device.vendorId ?? 'N/A'}');
+                  },
+                );
+              }),
+          ],
+        ),
       ),
     );
   }
