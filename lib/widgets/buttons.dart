@@ -11,23 +11,37 @@ class Buttons extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Text(
-          'Update',
-          style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                color: Colors.white,
-              ),
+        ElevatedButton(
+          onPressed: () {
+            print('Update');
+          },
+          child: Text(
+            'Update',
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  color: Colors.white,
+                  fontSize: 32,
+                ),
+          ),
+        ),
+        SizedBox(
+          height: 12,
         ),
         OutlinedButton(
           onPressed: () {
-            ref.read(devicesProvider.notifier).getAvailablePorts();
+            ref.read(devicesProvider.notifier).getFilteredPorts();
           },
           child: Text(
             'Refresh',
             style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   color: Colors.white,
+                  fontSize: 26,
                 ),
           ),
+        ),
+        SizedBox(
+          height: 12,
         ),
         OutlinedButton(
           onPressed: () => exit(0), // TODO: add graceful exit
@@ -35,6 +49,7 @@ class Buttons extends ConsumerWidget {
             'Exit',
             style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   color: Colors.white,
+                  fontSize: 26,
                 ),
           ),
         )

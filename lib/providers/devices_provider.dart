@@ -8,9 +8,9 @@ class AvailableDevicesNotifier extends StateNotifier<List<SerialPort>> {
   AvailableDevicesNotifier() : super([]);
 
   // TODO: able to implement getter instead?
-  void getAvailablePorts() {
+  void getFilteredPorts() {
     final availablePorts = SerialPort.availablePorts;
-    List<SerialPort> devices = [];
+    List<SerialPort> filteredPorts = [];
 
     for (final port in availablePorts) {
       final device = SerialPort(port);
@@ -22,11 +22,11 @@ class AvailableDevicesNotifier extends StateNotifier<List<SerialPort>> {
       // TODO: find a more specific way to filter devices
       // if (device.productId == 3268 && device.vendorId == 5840) {
       if (device.description!.contains('X2')) {
-        devices.add(device);
+        filteredPorts.add(device);
       }
     }
 
-    state = devices;
+    state = filteredPorts;
   }
 }
 

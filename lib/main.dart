@@ -10,9 +10,13 @@ final theme = ThemeData(
     ),
     // TODO: configure text colors
     textTheme: const TextTheme(
-      titleLarge: TextStyle(color: Colors.white),
-      titleMedium: TextStyle(color: Colors.grey),
-      bodyMedium: TextStyle(color: Colors.grey),
+      titleLarge: TextStyle(color: Colors.white, fontSize: 58),
+      titleMedium: TextStyle(
+        color: Colors.grey,
+      ),
+      bodyMedium: TextStyle(
+        color: Colors.grey,
+      ),
     ));
 
 class App extends StatelessWidget {
