@@ -1,4 +1,4 @@
-package org.sigrok.flutter_libserialport_example
+package org.sigrok.x2_fwupdate
 
 import io.flutter.embedding.android.FlutterActivity
 

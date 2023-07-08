@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(flutter_libserialport_example LANGUAGES CXX)
+project(x2_fwupdate LANGUAGES CXX)
 
-set(BINARY_NAME "flutter_libserialport_example")
+set(BINARY_NAME "x2_fwupdate")
 
 cmake_policy(SET CMP0063 NEW)
 
