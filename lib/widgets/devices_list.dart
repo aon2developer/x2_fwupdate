@@ -25,25 +25,8 @@ class _DeviceListState extends ConsumerState<DeviceList> {
 
     print('Updating ${device.description}...');
 
-    // Find the Arduino port
-    final String port = '/dev/ttyACM0'; // Temp hard coded
-    // Compare the productid and vender id from device with the same values from
-    // command line
+    shell.run('./assets/update.sh');
 
-    // Update X2 - run() will return will return the status of each executed command
-    var status = await shell.run('''
-
-      stty -F "/dev/ttyACM0" 1200
-      sleep 1
-      ./assets/dfu-util-linux -d 0x16D0:0x0CC4,0x0483:0xdf11 -a 0 -s 0x08000000:leave -D ./assets/X2-1.3.6.dfu
-
-    ''');
-
-    // use status to give different errors AND percentage bar
-    // e.g. if putting the device into update mode didnt work then suggest to
-    // plug in the x2
-    // if the update util didnt work the tell the user to switch the device off
-    // and try again. to reset the port mode, press the middle button for 20 seconds to force shutoff
     return false;
   }
 
