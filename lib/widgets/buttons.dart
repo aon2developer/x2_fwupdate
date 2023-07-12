@@ -13,21 +13,21 @@ class Buttons extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        ElevatedButton(
-          onPressed: () {
-            print('Update');
-          },
-          child: Text(
-            'Update',
-            style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  color: Colors.white,
-                  fontSize: 32,
-                ),
-          ),
-        ),
-        SizedBox(
-          height: 12,
-        ),
+        // ElevatedButton(
+        //   onPressed: () {
+        //     print('Update');
+        //   },
+        //   child: Text(
+        //     'Update',
+        //     style: Theme.of(context).textTheme.titleMedium!.copyWith(
+        //           color: Colors.white,
+        //           fontSize: 32,
+        //         ),
+        //   ),
+        // ),
+        // SizedBox(
+        //   height: 12,
+        // ),
         OutlinedButton(
           onPressed: () {
             ref.read(devicesProvider.notifier).getFilteredPorts();
