@@ -13,26 +13,15 @@ class Buttons extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        // ElevatedButton(
-        //   onPressed: () {
-        //     print('Update');
-        //   },
-        //   child: Text(
-        //     'Update',
-        //     style: Theme.of(context).textTheme.titleMedium!.copyWith(
-        //           color: Colors.white,
-        //           fontSize: 32,
-        //         ),
-        //   ),
-        // ),
-        // SizedBox(
-        //   height: 12,
-        // ),
-        OutlinedButton(
+        ElevatedButton.icon(
           onPressed: () {
             ref.read(devicesProvider.notifier).getFilteredPorts();
           },
-          child: Text(
+          icon: Icon(
+            Icons.refresh,
+            size: 26,
+          ),
+          label: Text(
             'Refresh',
             style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   color: Colors.white,
@@ -43,14 +32,24 @@ class Buttons extends ConsumerWidget {
         SizedBox(
           height: 12,
         ),
-        OutlinedButton(
+        ElevatedButton.icon(
           onPressed: () => exit(0), // TODO: add graceful exit
-          child: Text(
+          icon: Icon(
+            Icons.exit_to_app,
+            size: 26,
+          ),
+          label: Text(
             'Exit',
             style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   color: Colors.white,
                   fontSize: 26,
                 ),
+          ),
+          style: ButtonStyle(
+            backgroundColor: MaterialStatePropertyAll(
+              Theme.of(context)
+                  .primaryColorDark, // TODO: match with background color
+            ),
           ),
         )
       ],

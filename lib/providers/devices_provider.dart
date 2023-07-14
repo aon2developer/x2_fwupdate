@@ -15,15 +15,11 @@ class AvailableDevicesNotifier extends StateNotifier<List<SerialPort>> {
     for (final port in availablePorts) {
       final device = SerialPort(port);
 
-      // print('device.name: ${device.name}');
-      // print('productId: ${device.productId}');
-      // print('vendorId: ${device.vendorId}');
-
-      // TODO: find a more specific way to filter devices
       // if (device.productId == 3268 && device.vendorId == 5840) {
-      if (device.description!.contains('X2')) {
-        filteredPorts.add(device);
-      }
+      // if (device.description!.contains('X2')) {
+      //   filteredPorts.add(device);
+      // }
+      filteredPorts.add(device);
     }
 
     state = filteredPorts;

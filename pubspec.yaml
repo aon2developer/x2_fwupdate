@@ -1,5 +1,5 @@
 name: x2_fwupdate
-description: Demonstrates how to use the flutter_libserialport plugin.
+description: Manage X2 firmware
 publish_to: 'none'
 
 environment:
@@ -14,3 +14,5 @@ dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/aon2-logo-white.png
