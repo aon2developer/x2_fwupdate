@@ -10,15 +10,36 @@ class UpdateScreen extends StatelessWidget {
       padding: EdgeInsets.all(24),
       width: double.infinity,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          BackButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
+          Text(
+            'Updating device...',
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  fontSize: 44,
+                ),
           ),
-          Text('Updating device...'),
-          Text('Progress bar'),
-          Text('Cancel button'),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Progress bar',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              SizedBox(
+                height: 24,
+              ),
+              OutlinedButton(
+                onPressed: () {
+                  // Cancel update
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  'Cancel button',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

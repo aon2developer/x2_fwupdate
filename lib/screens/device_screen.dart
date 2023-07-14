@@ -59,14 +59,17 @@ class DeviceScreen extends ConsumerWidget {
               DeviceList(),
             ],
           ),
+          // TODO: make persistent on every screen
           Align(
-            alignment: Alignment.bottomLeft,
+            alignment: Alignment.bottomCenter,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Image.asset(
                   'assets/images/aon2-logo-white.png',
                   width: 200,
-                )
+                ),
+                Text('Copyright AON2'),
               ],
             ),
           ),
