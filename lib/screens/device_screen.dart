@@ -53,8 +53,9 @@ class DeviceScreen extends ConsumerWidget {
             SizedBox(
               height: 12,
             ),
+            DeviceList(),
           ]),
-          DeviceList(),
+
           // TODO: make persistent on every screen
           Align(
             alignment: Alignment.bottomCenter,

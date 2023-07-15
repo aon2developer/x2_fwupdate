@@ -1,12 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:process_run/shell.dart';
 
 import 'package:x2_fwupdate/providers/devices_provider.dart';
-import 'package:x2_fwupdate/screens/update_screen.dart';
 import 'package:x2_fwupdate/widgets/update_confirmation.dart';
 
 class DeviceList extends ConsumerStatefulWidget {
@@ -34,6 +30,26 @@ class _DeviceListState extends ConsumerState<DeviceList> {
     final availableDevices = ref.watch(devicesProvider);
     print(availableDevices);
 
+    Widget content = Text('No devices found!');
+
+    if (availableDevices.isNotEmpty) {
+      content = ListView.builder(
+          itemCount: availableDevices.length,
+          itemBuilder: (ctx, index) {
+            return ListTile(
+              title: Text(
+                '${availableDevices[index].productName} by ${availableDevices[index].manufacturer}',
+                style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                      color: Colors.white,
+                    ),
+              ),
+              onTap: () {
+                _selectDevice(availableDevices[index]);
+              },
+            );
+          });
+    }
+
     return SingleChildScrollView(
       child: Container(
         margin: EdgeInsets.all(12),
@@ -44,11 +60,11 @@ class _DeviceListState extends ConsumerState<DeviceList> {
           children: [
             for (final device in availableDevices)
               Builder(builder: (context) {
-                // final port = SerialPort(address);
+                print('Device(s) found');
                 return ListTile(
                   title: Text(
-                    '${device.description} by ${device.manufacturer}',
-                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    '${device.productName} by ${device.manufacturer}',
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
                           color: Colors.white,
                         ),
                   ),
@@ -57,6 +73,7 @@ class _DeviceListState extends ConsumerState<DeviceList> {
                   },
                 );
               }),
+            // content,
           ],
         ),
       ),

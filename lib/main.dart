@@ -19,6 +19,10 @@ final theme = ThemeData(
     titleSmall: TextStyle(
       fontSize: 24,
     ),
+    bodyLarge: TextStyle(
+      color: Colors.grey,
+      fontSize: 22,
+    ),
     bodyMedium: TextStyle(
       color: Colors.grey,
       fontSize: 20,

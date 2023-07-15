@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:process_run/shell.dart';
+import 'package:x2_fwupdate/providers/result_provider.dart';
 
 import 'package:x2_fwupdate/screens/update_screen.dart';
 
-class UpdateConfirmation extends StatelessWidget {
+class UpdateConfirmation extends ConsumerWidget {
   UpdateConfirmation({required this.selectedDevice, super.key});
 
   final SerialPort selectedDevice;
@@ -17,42 +19,47 @@ class UpdateConfirmation extends StatelessWidget {
 
     print('Updating ${selectedDevice.description}...');
 
-    updateResult = shell.run('./assets/util/update.sh');
+    // // Set provider to value
+    // updateResult = shell.run('./assets/util/update.sh');
 
-    // // Artificial success until X2 is fixed
-    // updateResult = shell.run('''
+    // Artificial success until X2 is fixed
+    print('Starting update...');
+    updateResult = shell.run('''
 
-    //   echo "Pretending to update"
-    //   echo "Done!"
+      echo "Pretending to update"
+      sleep 5
+      echo "Done!"
 
-    // ''');
-
-    print(updateResult);
+    ''');
+    print('Update complete!');
 
     return false;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     Future<bool> _updateSuccessful;
+    Future<List<ProcessResult>> result = ref.watch(resultProvider);
 
     return AlertDialog(
       title: Text(
         'Are you sure that you want to update this device?',
-        style: Theme.of(context).textTheme.titleLarge,
+        style: Theme.of(context).textTheme.titleSmall,
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             'Device information',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           SizedBox(
-            height: 6,
+            height: 4,
           ),
           Text(
-            'Name: ${selectedDevice.description}',
+            'Name: ${selectedDevice.productName}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           SizedBox(
@@ -69,20 +76,6 @@ class UpdateConfirmation extends StatelessWidget {
             'Serial Number: ${selectedDevice.serialNumber}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
-          SizedBox(
-            height: 4,
-          ),
-          Text(
-            'Product ID: ${selectedDevice.productId}',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          SizedBox(
-            height: 4,
-          ),
-          Text(
-            'Vendor ID: ${selectedDevice.vendorId}',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
         ],
       ),
       actions: [
@@ -95,7 +88,6 @@ class UpdateConfirmation extends StatelessWidget {
         ),
         TextButton(
           onPressed: () {
-            print('Start update'); // execute start update
             _updateSuccessful = _updateDevice(selectedDevice);
             print(_updateSuccessful);
             Navigator.pop(context);
