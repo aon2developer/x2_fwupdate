@@ -30,24 +30,41 @@ class _DeviceListState extends ConsumerState<DeviceList> {
     final availableDevices = ref.watch(devicesProvider);
     print(availableDevices);
 
-    Widget content = Text('No devices found!');
+    List<Widget> content = [];
 
     if (availableDevices.isNotEmpty) {
-      content = ListView.builder(
-          itemCount: availableDevices.length,
-          itemBuilder: (ctx, index) {
-            return ListTile(
-              title: Text(
-                '${availableDevices[index].productName} by ${availableDevices[index].manufacturer}',
-                style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                      color: Colors.white,
-                    ),
+      for (final device in availableDevices) {
+        content.add(ListTile(
+          title: Text(
+            '${device.productName} by ${device.manufacturer}',
+            style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                  color: Colors.white,
+                ),
+          ),
+          onTap: () {
+            _selectDevice(device);
+          },
+        ));
+      }
+    } else {
+      content = [
+        Container(
+          alignment: Alignment.center,
+          padding: EdgeInsets.all(25),
+          child: Column(
+            children: [
+              Text(
+                'No devices found!',
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-              onTap: () {
-                _selectDevice(availableDevices[index]);
-              },
-            );
-          });
+              Text(
+                'Try refreshing again...',
+                style: Theme.of(context).textTheme.bodyLarge,
+              )
+            ],
+          ),
+        ),
+      ];
     }
 
     return SingleChildScrollView(
@@ -58,22 +75,11 @@ class _DeviceListState extends ConsumerState<DeviceList> {
         ),
         child: Column(
           children: [
-            for (final device in availableDevices)
+            for (final device in content)
               Builder(builder: (context) {
                 print('Device(s) found');
-                return ListTile(
-                  title: Text(
-                    '${device.productName} by ${device.manufacturer}',
-                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                          color: Colors.white,
-                        ),
-                  ),
-                  onTap: () {
-                    _selectDevice(device);
-                  },
-                );
+                return device;
               }),
-            // content,
           ],
         ),
       ),
