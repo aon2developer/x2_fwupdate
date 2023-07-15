@@ -11,13 +11,17 @@ final theme = ThemeData(
   // TODO: configure text colors
   textTheme: const TextTheme(
     titleLarge: TextStyle(
-      color: Colors.white,
+      fontSize: 58,
     ),
     titleMedium: TextStyle(
-      color: Colors.grey,
+      fontSize: 38,
+    ),
+    titleSmall: TextStyle(
+      fontSize: 24,
     ),
     bodyMedium: TextStyle(
       color: Colors.grey,
+      fontSize: 20,
     ),
   ),
 );

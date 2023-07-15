@@ -25,7 +25,7 @@ echo $devpath
 
 # Put X2 into update mode 
 stty -F "$devpath" 1200
-sleep 1
+sleep 5
 
 # Execute update utility
 ./dfu-util-linux -d 0x16D0:0x0CC4,0x0483:0xdf11 -a 0 -s 0x08000000:leave -D ../firmware/X2-1.3.6.dfu

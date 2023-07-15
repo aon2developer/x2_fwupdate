@@ -10,6 +10,7 @@ dependencies:
     sdk: flutter
   flutter_libserialport: ^0.3.0
   flutter_riverpod: ^2.3.6
+  loading_animation_widget: ^1.2.0+4
   process_run: ^0.13.0
 
 flutter:

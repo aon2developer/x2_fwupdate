@@ -1,6 +1,9 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import 'package:x2_fwupdate/providers/devices_provider.dart';
 import 'package:x2_fwupdate/widgets/update_confirmation.dart';
@@ -27,31 +30,31 @@ class _DeviceListState extends ConsumerState<DeviceList> {
     final availableDevices = ref.watch(devicesProvider);
     print(availableDevices);
 
-    return SingleChildScrollView(
-      child: Container(
-        margin: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.grey[850],
-        ),
-        child: Column(
-          children: [
-            for (final device in availableDevices)
-              Builder(builder: (context) {
-                // final port = SerialPort(address);
-                return ListTile(
-                  title: Text(
-                    '${device.description} by ${device.manufacturer}',
-                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                          color: Colors.white,
-                        ),
-                  ),
-                  onTap: () {
-                    _selectDevice(device);
-                  },
-                );
-              }),
-          ],
-        ),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          LoadingAnimationWidget.inkDrop(
+            color: Theme.of(context).colorScheme.primary,
+            size: 80,
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Text(
+            'Searching...',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          SizedBox(
+            height: 40,
+          ),
+          Text(
+            'CONNECT YOUR X2',
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+          ),
+        ],
       ),
     );
   }
