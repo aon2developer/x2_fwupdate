@@ -7,6 +7,7 @@ Plug in your X2 and you will have options to:
 - Downgrade to a previous firmware version
 
 To get started working on this project, simply clone this repo and run
+
 ```bash
 $ cd x2_fwupdate
 $ pub get
