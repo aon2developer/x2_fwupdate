@@ -1,9 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 
-// flutter: Product id: 3268
-// flutter: Vendor id: 5840
-
 class AvailableDevicesNotifier extends StateNotifier<List<SerialPort>> {
   AvailableDevicesNotifier() : super([]);
 

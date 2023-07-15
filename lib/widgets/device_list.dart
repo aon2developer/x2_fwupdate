@@ -1,12 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:process_run/shell.dart';
 
 import 'package:x2_fwupdate/providers/devices_provider.dart';
-import 'package:x2_fwupdate/screens/update_screen.dart';
 import 'package:x2_fwupdate/widgets/update_confirmation.dart';
 
 class DeviceList extends ConsumerStatefulWidget {
@@ -24,9 +20,6 @@ class _DeviceListState extends ConsumerState<DeviceList> {
       context: context,
       builder: (ctx) => UpdateConfirmation(selectedDevice: device),
     );
-
-    // true: start update (seperate function)
-    // false: disregaurd selectede device
   }
 
   @override

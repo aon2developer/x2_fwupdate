@@ -10,23 +10,22 @@ class UpdateConfirmation extends StatelessWidget {
   UpdateConfirmation({required this.selectedDevice, super.key});
 
   final SerialPort selectedDevice;
-
-  var shell = Shell();
+  final shell = Shell();
 
   Future<bool> _updateDevice(SerialPort selectedDevice) async {
     Future<List<ProcessResult>> updateResult;
 
     print('Updating ${selectedDevice.description}...');
 
-    // updateResult = shell.run('./assets/util/update.sh');
+    updateResult = shell.run('./assets/util/update.sh');
 
-    // Artificial success until X2 is fixed
-    updateResult = shell.run('''
+    // // Artificial success until X2 is fixed
+    // updateResult = shell.run('''
 
-      echo "Pretending to update"
-      echo "Done!"
-    
-    ''');
+    //   echo "Pretending to update"
+    //   echo "Done!"
+
+    // ''');
 
     print(updateResult);
 
@@ -73,24 +72,23 @@ class UpdateConfirmation extends StatelessWidget {
           SizedBox(
             height: 4,
           ),
-          // Text(
-          //   'Product ID: ${selectedDevice.productId}',
-          //   style: Theme.of(context).textTheme.bodyMedium,
-          // ),
-          // SizedBox(
-          //   height: 4,
-          // ),
-          // Text(
-          //   'Vendor ID: ${selectedDevice.vendorId}',
-          //   style: Theme.of(context).textTheme.bodyMedium,
-          // ),
+          Text(
+            'Product ID: ${selectedDevice.productId}',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          SizedBox(
+            height: 4,
+          ),
+          Text(
+            'Vendor ID: ${selectedDevice.vendorId}',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ],
       ),
       actions: [
         TextButton(
           onPressed: () {
             print('Cancel update');
-            selectedDevice.dispose();
             Navigator.pop(context);
           },
           child: Text('No, cancel.'),
@@ -99,6 +97,7 @@ class UpdateConfirmation extends StatelessWidget {
           onPressed: () {
             print('Start update'); // execute start update
             _updateSuccessful = _updateDevice(selectedDevice);
+            print(_updateSuccessful);
             Navigator.pop(context);
             Navigator.push(
               context,
