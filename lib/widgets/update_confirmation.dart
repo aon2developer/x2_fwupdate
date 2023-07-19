@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:process_run/shell.dart';
-import 'package:x2_fwupdate/providers/result_provider.dart';
 
 import 'package:x2_fwupdate/screens/update_screen.dart';
 
@@ -21,7 +18,6 @@ class UpdateConfirmation extends ConsumerStatefulWidget {
 class _UpdateConfirmationState extends ConsumerState<UpdateConfirmation> {
   @override
   Widget build(BuildContext context) {
-    Future<List<ProcessResult>> result = ref.watch(resultProvider);
     SerialPort device = widget.selectedDevice;
 
     return AlertDialog(
@@ -80,7 +76,6 @@ class _UpdateConfirmationState extends ConsumerState<UpdateConfirmation> {
                 ),
               ),
             );
-            // Start update (where to put)
           },
           child: Text('Yes, update!'),
         ),

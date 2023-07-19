@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:process_run/shell.dart';
-import 'package:x2_fwupdate/widgets/progress_bar.dart';
 import 'package:x2_fwupdate/widgets/update_complete.dart';
 import 'package:x2_fwupdate/widgets/update_working.dart';
 
@@ -26,25 +25,28 @@ class _UpdateScreenState extends ConsumerState<UpdateScreen> {
   void _updateDevice(SerialPort device) async {
     List<ProcessResult> updateResult;
 
-    print('UpdateWorking ${device.description}...');
+    print('Updatng ${device.description}...');
 
-    // // Set provider to value
-    // updateResult = shell.run('./assets/util/update.sh');
+    if (Platform.isLinux)
+      updateResult =
+          await shell.run('./assets/util/update-linux.sh ${device.name}');
+    else if (Platform.isMacOS)
+      updateResult =
+          await shell.run('./assets/util/update-macos.sh ${device.name}');
+    else if (Platform.isWindows)
+      updateResult =
+          await shell.run('./assets/util/update-windows.sh ${device.name}');
+    // TODO: raise error
+    else {
+      print('Incompatable platform');
+      updateResult = await shell.run('echo Incompatable platform');
+    }
 
-    // Artificial success until X2 is fixed
-    print('Starting update...');
-    updateResult = await shell.run('''
-
-      echo "Pretending to update"
-      sleep 1
-      echo "Done!"
-
-    ''');
-    print('Update complete!');
+    // Stream?
 
     final finalCommand = updateResult[updateResult.length - 1];
-    print('Your output: ${finalCommand.stdout}');
-    print('Your output status: ${finalCommand.exitCode}');
+    print('stdout: ${finalCommand.stdout}');
+    print('exitCode: ${finalCommand.exitCode}');
 
     if (finalCommand.exitCode == 0) {
       setState(() {

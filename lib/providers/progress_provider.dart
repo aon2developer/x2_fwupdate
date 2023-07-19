@@ -5,6 +5,7 @@ class ProgressNotifier extends StateNotifier<double> {
 
   // Executed every time a new output is given from process status
   void getProgress() {
+    // stdout writes lines => get progress %
     // Find progress percentage from output
     // Set as progress
     print('Getting progress!');

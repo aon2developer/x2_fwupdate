@@ -15,7 +15,8 @@ class DeviceList extends ConsumerStatefulWidget {
 class _DeviceListState extends ConsumerState<DeviceList> {
   _selectDevice(SerialPort device) {
     print('Device selected!');
-
+    print(device.name);
+    print(device.address);
     showDialog(
       context: context,
       builder: (ctx) => UpdateConfirmation(selectedDevice: device),
