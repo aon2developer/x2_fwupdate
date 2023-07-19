@@ -19,43 +19,6 @@ class UpdateConfirmation extends ConsumerStatefulWidget {
 }
 
 class _UpdateConfirmationState extends ConsumerState<UpdateConfirmation> {
-  bool _updateSuccess = false;
-
-  void _updateDevice(SerialPort device) async {
-    List<ProcessResult> updateResult;
-
-    print('Updating ${device.description}...');
-
-    // // Set provider to value
-    // updateResult = shell.run('./assets/util/update.sh');
-
-    // Artificial success until X2 is fixed
-    print('Starting update...');
-    updateResult = await shell.run('''
-
-      echo "Pretending to update"
-      sleep 1
-      echo "Done!"
-
-    ''');
-    print('Update complete!');
-
-    final finalCommand = updateResult[updateResult.length - 1];
-    print('Your output: ${finalCommand.stdout}');
-    print('Your output status: ${finalCommand.exitCode}');
-
-    if (finalCommand.exitCode == 0) {
-      setState(() {
-        _updateSuccess = true;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     Future<List<ProcessResult>> result = ref.watch(resultProvider);
@@ -108,15 +71,16 @@ class _UpdateConfirmationState extends ConsumerState<UpdateConfirmation> {
         ),
         TextButton(
           onPressed: () {
-            // Navigator.pop(context);
+            Navigator.pop(context);
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (ctx) => UpdateScreen(),
+                builder: (ctx) => UpdateScreen(
+                  selectedDevice: device,
+                ),
               ),
             );
-            _updateDevice(device);
-            print(_updateSuccess ? 'failure' : 'success');
+            // Start update (where to put)
           },
           child: Text('Yes, update!'),
         ),

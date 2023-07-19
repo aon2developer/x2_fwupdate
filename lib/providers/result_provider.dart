@@ -6,12 +6,12 @@ import 'package:process_run/shell.dart';
 Shell shell = Shell();
 
 class ResultNotifier extends StateNotifier<Future<List<ProcessResult>>> {
-  ResultNotifier() : super(shell.run('echo hello!'));
+  ResultNotifier() : super(shell.run('echo result_provider'));
 
   // Find progress percentage from output
   Future<List<ProcessResult>> getResult() {
     print('Getting result!');
-    Future<List<ProcessResult>> result = shell.run('echo hello!');
+    Future<List<ProcessResult>> result = shell.run('echo result_provider');
 
     state = result;
     return result;
