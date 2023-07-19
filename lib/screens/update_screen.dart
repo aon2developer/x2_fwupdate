@@ -115,15 +115,11 @@ class _UpdateScreenState extends ConsumerState<UpdateScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Text('$percentage%'),
-          SizedBox(
-            width: 20,
-          ),
-          LinearProgressIndicator(
-            value: percentage, // convert percentage to double
-            semanticsLabel: 'Linear progress indicator',
-          ),
-          !_updateSuccess ? UpdateWorking() : UpdateComplete(),
+          !_updateSuccess
+              ? UpdateWorking(
+                  percentage: percentage,
+                )
+              : UpdateComplete(),
           if (!_updateSuccess)
             ElevatedButton.icon(
               onPressed: () {

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:x2_fwupdate/providers/progress_provider.dart';
 
 class ProgressBar extends ConsumerStatefulWidget {
-  ProgressBar({super.key});
+  ProgressBar({required this.percentage, super.key});
+
+  final double percentage;
 
   @override
   ConsumerState<ProgressBar> createState() => _ProgressBarState();
@@ -12,16 +13,23 @@ class ProgressBar extends ConsumerStatefulWidget {
 class _ProgressBarState extends ConsumerState<ProgressBar> {
   @override
   Widget build(BuildContext context) {
-    final progress = ref.watch(progressProvider);
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 300),
-      child:
-          CircularProgressIndicator(), // temporary while sorting out dynamic progress bar
-      // child: LinearProgressIndicator(
-      //   value: progress / 100, // convert percentage to double
-      //   semanticsLabel: 'Linear progress indicator',
-      // ),
+    return Column(
+      children: [
+        Container(
+          width: 600,
+          child: LinearProgressIndicator(
+            value: widget.percentage, // convert percentage to double
+            minHeight: 18,
+          ),
+        ),
+        SizedBox(
+          width: 20,
+        ),
+        Text(
+          '${widget.percentage * 100}%',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ],
     );
   }
 }

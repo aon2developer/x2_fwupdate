@@ -18,3 +18,5 @@ class ProgressNotifier extends StateNotifier<double> {
 final progressProvider = StateNotifierProvider<ProgressNotifier, double>((ref) {
   return ProgressNotifier();
 });
+
+// TODO: move the progress parser and setter into a provider

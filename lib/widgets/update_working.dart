@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:x2_fwupdate/widgets/progress_bar.dart';
 
 class UpdateWorking extends StatelessWidget {
-  const UpdateWorking({super.key});
+  UpdateWorking({required this.percentage, super.key});
+
+  final double percentage;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +19,7 @@ class UpdateWorking extends StatelessWidget {
         SizedBox(
           height: 50,
         ),
-        ProgressBar(),
+        ProgressBar(percentage: percentage),
       ],
     );
   }
