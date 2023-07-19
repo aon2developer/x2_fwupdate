@@ -8,38 +8,58 @@ import 'package:x2_fwupdate/providers/result_provider.dart';
 
 import 'package:x2_fwupdate/screens/update_screen.dart';
 
-class UpdateConfirmation extends ConsumerWidget {
+class UpdateConfirmation extends ConsumerStatefulWidget {
   UpdateConfirmation({required this.selectedDevice, super.key});
 
+  final shell = Shell(throwOnError: false);
   final SerialPort selectedDevice;
-  final shell = Shell();
 
-  Future<bool> _updateDevice(SerialPort selectedDevice) async {
-    Future<List<ProcessResult>> updateResult;
+  @override
+  ConsumerState<UpdateConfirmation> createState() => _UpdateConfirmationState();
+}
 
-    print('Updating ${selectedDevice.description}...');
+class _UpdateConfirmationState extends ConsumerState<UpdateConfirmation> {
+  bool _updateSuccess = false;
+
+  void _updateDevice(SerialPort device) async {
+    List<ProcessResult> updateResult;
+
+    print('Updating ${device.description}...');
 
     // // Set provider to value
     // updateResult = shell.run('./assets/util/update.sh');
 
     // Artificial success until X2 is fixed
     print('Starting update...');
-    updateResult = shell.run('''
+    updateResult = await shell.run('''
 
       echo "Pretending to update"
-      sleep 5
+      sleep 1
       echo "Done!"
 
     ''');
     print('Update complete!');
 
-    return false;
+    final finalCommand = updateResult[updateResult.length - 1];
+    print('Your output: ${finalCommand.stdout}');
+    print('Your output status: ${finalCommand.exitCode}');
+
+    if (finalCommand.exitCode == 0) {
+      setState(() {
+        _updateSuccess = true;
+      });
+    }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    Future<bool> _updateSuccessful;
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     Future<List<ProcessResult>> result = ref.watch(resultProvider);
+    SerialPort device = widget.selectedDevice;
 
     return AlertDialog(
       title: Text(
@@ -59,21 +79,21 @@ class UpdateConfirmation extends ConsumerWidget {
             height: 4,
           ),
           Text(
-            'Name: ${selectedDevice.productName}',
+            'Name: ${device.productName}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           SizedBox(
             height: 4,
           ),
           Text(
-            'Manufacturer: ${selectedDevice.manufacturer}',
+            'Manufacturer: ${device.manufacturer}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           SizedBox(
             height: 4,
           ),
           Text(
-            'Serial Number: ${selectedDevice.serialNumber}',
+            'Serial Number: ${device.serialNumber}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ],
@@ -88,15 +108,15 @@ class UpdateConfirmation extends ConsumerWidget {
         ),
         TextButton(
           onPressed: () {
-            _updateSuccessful = _updateDevice(selectedDevice);
-            print(_updateSuccessful);
-            Navigator.pop(context);
+            // Navigator.pop(context);
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (ctx) => UpdateScreen(),
               ),
             );
+            _updateDevice(device);
+            print(_updateSuccess ? 'failure' : 'success');
           },
           child: Text('Yes, update!'),
         ),
