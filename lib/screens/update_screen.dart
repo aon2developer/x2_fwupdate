@@ -80,7 +80,7 @@ class _UpdateScreenState extends ConsumerState<UpdateScreen> {
         '-s',
         '0x08000000:leave',
         '-D',
-        './assets/firmware/X2-1.3.6.dfuu'
+        './assets/firmware/X2-1.3.6.dfu'
       ]);
 
       // Check each outputted line for percentage

@@ -11,22 +11,17 @@ class UpdateError extends StatelessWidget {
     return Container(
       child: Column(
         children: [
-          Text(
-            'Update error due to $error',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          SizedBox(
-            height: 30,
-          ),
           if (error == 'stty')
             ErrorMessage(
-              desc: 'Failed to prepare for update',
+              title: 'Failed to prepare for update',
+              desc: 'Update error due to $error',
               help:
                   'If this happens again, try holding down the top and middle buttons at the same time for 20 seconds.',
             ),
           if (error == 'util')
             ErrorMessage(
-              desc: 'Failed to start update...',
+              title: 'Failed to start update...',
+              desc: 'Update error due to $error',
               help:
                   'To fix this, hold the middle button for 10 seconds to shutdown and try again.',
             ),
