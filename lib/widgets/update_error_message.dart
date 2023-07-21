@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:x2_fwupdate/widgets/error_message.dart';
 
-class UpdateError extends StatelessWidget {
-  UpdateError({required this.error, super.key});
+// TODO: if errors, mass find and replaced all but /models
+class UpdateErrorMessage extends StatelessWidget {
+  UpdateErrorMessage({required this.error, super.key});
 
   final String error;
 

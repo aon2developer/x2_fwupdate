@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:process_run/shell.dart';
+import 'package:x2_fwupdate/providers/update_provider.dart';
 
 import 'package:x2_fwupdate/screens/update_screen.dart';
 
@@ -66,6 +67,7 @@ class _UpdateConfirmationState extends ConsumerState<UpdateConfirmation> {
           child: Text('No, cancel.'),
         ),
         TextButton(
+          // Go to update screen and begin update
           onPressed: () {
             Navigator.pop(context);
             Navigator.push(
@@ -76,6 +78,7 @@ class _UpdateConfirmationState extends ConsumerState<UpdateConfirmation> {
                 ),
               ),
             );
+            ref.read(updateProvider.notifier).updateDevice(device);
           },
           child: Text('Yes, update!'),
         ),
