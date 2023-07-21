@@ -1,31 +1,95 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_libserialport/flutter_libserialport.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:x2_fwupdate/providers/update_provider.dart';
 import 'package:x2_fwupdate/widgets/error_message.dart';
 
 // TODO: if errors, mass find and replaced all but /models
-class UpdateErrorMessage extends StatelessWidget {
-  UpdateErrorMessage({required this.error, super.key});
+class UpdateErrorMessage extends ConsumerWidget {
+  UpdateErrorMessage({required this.error, required this.device, super.key});
 
   final String error;
+  final SerialPort device;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
+      // Make a limited width so that text isn't too long
       child: Column(
         children: [
           if (error == 'stty')
             ErrorMessage(
               title: 'Failed to prepare for update',
               desc: 'Update error due to $error',
-              help:
-                  'If this happens again, try holding down the top and middle buttons at the same time for 20 seconds.',
+              help: [
+                'If this happens again, try holding down the top and middle buttons at the same time for 20 seconds.'
+              ],
             ),
           if (error == 'util')
             ErrorMessage(
               title: 'Failed to start update...',
               desc: 'Update error due to $error',
-              help:
-                  'To fix this, hold the middle button for 10 seconds to shutdown and try again.',
+              help: [
+                'To fix this, hold the middle and top buttons for 20 seconds to shutdown the X2 and try again.',
+                'If this issue persists, then blah blah blah'
+              ],
             ),
+          SizedBox(
+            height: 50,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () {
+                  ref.read(updateProvider.notifier).resetErrors();
+                  ref.read(updateProvider.notifier).updateDevice(device);
+                },
+                icon: Icon(
+                  Icons.refresh,
+                  size: 26,
+                ),
+                label: Text(
+                  'Try again',
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        color: Colors.white,
+                        fontSize: 26,
+                      ),
+                ),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStatePropertyAll(
+                    Theme.of(context)
+                        .primaryColorDark, // TODO: match with background color
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 12,
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Icon(
+                  Icons.backspace,
+                  size: 26,
+                ),
+                label: Text(
+                  'Go back',
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        color: Colors.white,
+                        fontSize: 26,
+                      ),
+                ),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStatePropertyAll(
+                    Theme.of(context)
+                        .primaryColorDark, // TODO: match with background color
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

@@ -6,17 +6,27 @@ import 'package:process_run/shell.dart';
 import 'package:x2_fwupdate/models/update_error.dart';
 import 'package:x2_fwupdate/models/update_status.dart';
 
-// TODO: build updates when state is a double but not an UpdateStatus
-// Problem: when I return a double from the provider, the build method executes
-//  when the value is changed but when setting UpdateStatus.progress, the build
-//  method doesn't udate despite part of the state changing.
-//  I've also tried reassigning state to a new UpdateStatus object but that
-//  hasn't worked either.
-
 class UpdateNotifier extends StateNotifier<UpdateStatus> {
   UpdateNotifier()
       : super(
-            UpdateStatus(progress: 0, error: UpdateError(code: 0, reason: '')));
+          UpdateStatus(
+            progress: -1.0,
+            error: UpdateError(
+              code: 0,
+              reason: '',
+            ),
+          ),
+        );
+
+  void resetErrors() {
+    state = UpdateStatus(
+      progress: -1.0,
+      error: UpdateError(
+        code: -1, // special code to bypass entering bootloader mode
+        reason: '',
+      ),
+    );
+  }
 
   double? parsePercentage(String line) {
     // Find percentage value
@@ -37,65 +47,67 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
 
   void updateDevice(SerialPort device) async {
     Process process = await Process.start('echo', ['init_process']);
-    UpdateStatus newState = state;
-    double previousPercentage = newState.progress;
+    double previousPercentage = state.progress;
 
     if (Platform.isLinux) {
-      // // Try to execute port knock
-      // process = await Process.start(
-      //   'stty',
-      //   ['-F', '${device.name}', '1200'],
-      // );
-      // if (await process.exitCode != 0) {
-      //   print('Bootloader mode could not be activated');
-      //   state.error = UpdateError(code: await process.exitCode, reason: 'stty');
-      //   return;
-      // } else {
-      //   print('Activated bootloader mode!');
-      // }
+      // TODO: implement this as a function, take variables that change as parameters
+      if (state.error.code != -1) {
+        // Activate bootloader mode
+        process = await Process.start(
+          'stty',
+          ['-F', '${device.name}', '1200'],
+        );
+        if (await process.exitCode != 0) {
+          print('Bootloader mode could not be activated');
+          state = UpdateStatus(
+            error: UpdateError(code: await process.exitCode, reason: 'stty'),
+            progress: -1.0,
+          );
+          return;
+        } else {
+          print('Activated bootloader mode!');
+        }
 
-      // // Wait for bootloader mode to be activated
-      // print('Sleeping...');
-      // sleep(
-      //   Duration(seconds: 5),
-      // );
-      // print('Good morning!');
+        // Wait for bootloader mode to be activated
+        // TODO: display 'preparing update' on screen with loading symbol
+        // sleep(
+        //   Duration(seconds: 5),
+        // );
+        process = await Process.start('sleep', ['5']);
+      }
 
-      // // TODO: display 'preparing update' on screen with loading symbol
-      // // Try to update with dfu-util
-      // process = await Process.start('./assets/util/dfu-util-linux', [
-      //   '-d',
-      //   '0x16D0:0x0CC4,0x0483:0xdf11',
-      //   '-a',
-      //   '0',
-      //   '-s',
-      //   '0x08000000:leave',
-      //   '-D',
-      //   './assets/firmware/X2-1.3.6.dfu'
-      // ]);
-
-      process =
-          await Process.start('./assets/util/percentage_parse_test.sh', []);
+      // Try to update with dfu-util
+      process = await Process.start('./assets/util/dfu-util-linux', [
+        '-d',
+        '0x16D0:0x0CC4,0x0483:0xdf11',
+        '-a',
+        '0',
+        '-s',
+        '0x08000000:leave',
+        '-D',
+        './assets/firmware/X2-1.3.6.dfu'
+      ]);
 
       // Check each outputted line for percentage
       await for (final line in process.outLines) {
         print(line);
 
-        newState.progress = parsePercentage(line) ??
-            previousPercentage; // maybe only updates when state updates rather than part of state?
-        print(newState.progress.toString());
+        // TODO: find a way to optimise this? Unless you need to create a brand new object every time?
+        state = UpdateStatus(
+            error: UpdateError(code: 0, reason: ''),
+            progress: parsePercentage(line) ?? previousPercentage);
 
-        previousPercentage = newState.progress;
+        previousPercentage = state.progress;
       }
 
-      // // Check exit code for dfu-util after it finishes output
-      // if (await process.exitCode != 0) {
-      //   print('Failed to complete update util');
-      //   state.error = UpdateError(code: await process.exitCode, reason: 'util');
-      //   return;
-      // } else {
-      //   print('Update util done!');
-      // }
+      // Check exit code for dfu-util after it finishes output
+      if (await process.exitCode != 0) {
+        print('Failed to complete update util');
+        state.error = UpdateError(code: await process.exitCode, reason: 'util');
+        return;
+      } else {
+        print('Update util done!');
+      }
 
       // For each command, if fails, specify what failed for update_error.dart
     } else if (Platform.isMacOS)
@@ -109,11 +121,6 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
       print('Incompatable platform');
       process = await Process.start('echo', ['Incompatable', 'platform']);
     }
-
-    state = newState;
-
-    // // Mark the update as complete (will only get here if NOT returned from error)
-    // state.complete = true;
   }
 }
 
@@ -121,5 +128,3 @@ final updateProvider =
     StateNotifierProvider<UpdateNotifier, UpdateStatus>((ref) {
   return UpdateNotifier();
 });
-
-// TODO: move the progress parser and setter into a provider

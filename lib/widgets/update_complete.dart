@@ -15,9 +15,19 @@ class UpdateComplete extends StatelessWidget {
               'Update complete!',
               style: Theme.of(context).textTheme.titleMedium,
             ),
+            SizedBox(
+              height: 12,
+            ),
             Text(
-              'You may now close this application.',
+              'You may now unplug your X2 device and close this application.',
               style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            Text(
+              'Your X2 will automatically reboot and will be ready soon...',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            SizedBox(
+              height: 12,
             ),
           ],
         ),

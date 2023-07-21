@@ -14,9 +14,6 @@ class DeviceList extends ConsumerStatefulWidget {
 
 class _DeviceListState extends ConsumerState<DeviceList> {
   _selectDevice(SerialPort device) {
-    print('Device selected!');
-    print(device.name);
-    print(device.address);
     showDialog(
       context: context,
       builder: (ctx) => UpdateConfirmation(selectedDevice: device),
@@ -24,6 +21,15 @@ class _DeviceListState extends ConsumerState<DeviceList> {
 
     // true: start update (seperate function)
     // false: disregaurd selectede device
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Wait for build to render then find devices
+    Future(() {
+      ref.read(devicesProvider.notifier).findX2Devices();
+    });
   }
 
   @override

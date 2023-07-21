@@ -2,11 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 
 class AvailableDevicesNotifier extends StateNotifier<List<SerialPort>> {
-  // TODO: check for available devices on startup
   AvailableDevicesNotifier() : super([]);
 
-  // TODO: able to implement getter instead?
-  void getFilteredPorts() {
+  void findX2Devices() {
     final availablePorts = SerialPort.availablePorts;
     List<SerialPort> filteredPorts = [];
 

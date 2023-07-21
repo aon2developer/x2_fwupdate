@@ -15,7 +15,7 @@ class Buttons extends ConsumerWidget {
       children: [
         ElevatedButton.icon(
           onPressed: () {
-            ref.read(devicesProvider.notifier).getFilteredPorts();
+            ref.read(devicesProvider.notifier).findX2Devices();
           },
           icon: Icon(
             Icons.refresh,
