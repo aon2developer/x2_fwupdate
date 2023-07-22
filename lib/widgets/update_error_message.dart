@@ -13,7 +13,6 @@ class UpdateErrorMessage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      // TODO: Make a limited width so that text isn't too long
       child: Column(
         children: [
           // TODO: use elifs
@@ -76,8 +75,7 @@ class UpdateErrorMessage extends ConsumerWidget {
                 ),
                 style: ButtonStyle(
                   backgroundColor: MaterialStatePropertyAll(
-                    Theme.of(context)
-                        .primaryColorDark, // TODO: match with background color
+                    Theme.of(context).primaryColorDark,
                   ),
                 ),
               ),
@@ -101,8 +99,7 @@ class UpdateErrorMessage extends ConsumerWidget {
                 ),
                 style: ButtonStyle(
                   backgroundColor: MaterialStatePropertyAll(
-                    Theme.of(context)
-                        .primaryColorDark, // TODO: match with background color
+                    Theme.of(context).primaryColorDark,
                   ),
                 ),
               ),
