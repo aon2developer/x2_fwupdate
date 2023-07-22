@@ -66,7 +66,6 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     await for (final line in process.outLines) {
       print(line);
 
-      // TODO: find a way to optimise this? Unless you need to create a brand new object every time?
       state = UpdateStatus(
         error: state.error,
         progress: parsePercentage(line) ?? previousPercentage,
@@ -106,7 +105,6 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
           print('Activated bootloader mode!');
         }
 
-        // TODO: display 'preparing update' on screen with loading symbol
         // Wait for bootloader mode to be activated
         sleep(
           Duration(seconds: 5),

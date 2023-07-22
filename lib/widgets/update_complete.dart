@@ -51,8 +51,7 @@ class UpdateComplete extends ConsumerWidget {
           ),
           style: ButtonStyle(
             backgroundColor: MaterialStatePropertyAll(
-              Theme.of(context)
-                  .primaryColorDark, // TODO: match with background color
+              Theme.of(context).primaryColorDark,
             ),
           ),
         ),
