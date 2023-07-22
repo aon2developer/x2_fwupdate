@@ -3,7 +3,7 @@ import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:x2_fwupdate/providers/devices_provider.dart';
-import 'package:x2_fwupdate/widgets/update_confirmation.dart';
+import 'package:x2_fwupdate/widgets/update/update_confirmation.dart';
 
 class DeviceList extends ConsumerStatefulWidget {
   const DeviceList({super.key});

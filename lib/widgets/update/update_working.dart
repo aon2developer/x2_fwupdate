@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:x2_fwupdate/widgets/progress_bar.dart';
+import 'package:x2_fwupdate/widgets/update/progress_bar.dart';
 
 class UpdateWorking extends StatelessWidget {
   UpdateWorking({required this.percentage, super.key});

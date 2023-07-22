@@ -82,7 +82,7 @@ class ErrorMessage extends StatelessWidget {
                                   await launchUrl(Uri.parse(link!));
                                 },
                                 child: Text(
-                                  'Download boot loader driver',
+                                  link!,
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyLarge!

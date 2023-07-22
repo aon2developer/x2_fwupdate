@@ -3,10 +3,10 @@ import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:x2_fwupdate/providers/update_provider.dart';
-import 'package:x2_fwupdate/widgets/preparing_update.dart';
-import 'package:x2_fwupdate/widgets/update_complete.dart';
-import 'package:x2_fwupdate/widgets/update_error_message.dart';
-import 'package:x2_fwupdate/widgets/update_working.dart';
+import 'package:x2_fwupdate/widgets/update/preparing_update.dart';
+import 'package:x2_fwupdate/widgets/update/update_complete.dart';
+import 'package:x2_fwupdate/widgets/update/update_error_message.dart';
+import 'package:x2_fwupdate/widgets/update/update_working.dart';
 
 class UpdateScreen extends ConsumerWidget {
   UpdateScreen({required this.selectedDevice, super.key});
