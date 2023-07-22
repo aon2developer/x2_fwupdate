@@ -21,22 +21,25 @@ class UpdateScreen extends ConsumerWidget {
       decoration: BoxDecoration(color: Theme.of(context).primaryColorDark),
       padding: EdgeInsets.all(24),
       width: double.infinity,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Display different widget depending on updateState
-          updateState.error.code == 0 // no errors
-              ? updateState.progress <
-                      1.0 // not yet complete (updating in progress)
-                  ? UpdateWorking(
-                      percentage: updateState.progress,
-                    )
-                  : UpdateComplete()
-              : UpdateErrorMessage(
-                  error: updateState.error.reason,
-                  device: device,
-                ),
-        ],
+      alignment: Alignment.center,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // Display different widget depending on updateState
+            updateState.error.code == 0 // no errors
+                ? updateState.progress <
+                        1.0 // not yet complete (updating in progress)
+                    ? UpdateWorking(
+                        percentage: updateState.progress,
+                      )
+                    : UpdateComplete()
+                : UpdateErrorMessage(
+                    error: updateState.error.reason,
+                    device: device,
+                  ),
+          ],
+        ),
       ),
     );
   }

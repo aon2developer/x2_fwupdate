@@ -14,6 +14,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
             error: UpdateError(
               code: 0,
               reason: '',
+              driverInstalled: false,
             ),
           ),
         );
@@ -24,6 +25,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
       error: UpdateError(
         code: -1, // special code to bypass entering bootloader mode
         reason: '',
+        driverInstalled: true,
       ),
     );
   }
@@ -70,10 +72,10 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
 
         // Wait for bootloader mode to be activated
         // TODO: display 'preparing update' on screen with loading symbol
-        // sleep(
-        //   Duration(seconds: 5),
-        // );
-        process = await Process.start('sleep', ['5']);
+        sleep(
+          Duration(seconds: 5),
+        );
+        // process = await Process.start('sleep', ['5']);
       }
 
       // Try to update with dfu-util
@@ -113,9 +115,20 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     } else if (Platform.isMacOS)
       process = await Process.start(
           './assets/util/update-macos.sh', ['${device.name}']);
-    else if (Platform.isWindows)
+    else if (Platform.isWindows) {
+      // prompt user to ensure that htey have installed the boot loader driver
+      if (!state.error.driverInstalled!) {
+        state = UpdateStatus(
+          error: UpdateError(code: 1, reason: 'no-driver'),
+          progress: -1.0,
+        );
+        return;
+      }
+
       process = await Process.start(
           './assets/util/update-windows.sh', ['${device.name}']);
+    }
+
     // TODO: raise error
     else {
       print('Incompatable platform');
