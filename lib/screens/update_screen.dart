@@ -3,6 +3,7 @@ import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:x2_fwupdate/providers/update_provider.dart';
+import 'package:x2_fwupdate/widgets/preparing_update.dart';
 import 'package:x2_fwupdate/widgets/update_complete.dart';
 import 'package:x2_fwupdate/widgets/update_error_message.dart';
 import 'package:x2_fwupdate/widgets/update_working.dart';
@@ -26,18 +27,21 @@ class UpdateScreen extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            // Display different widget depending on updateState
-            updateState.error.code == 0 // no errors
-                ? updateState.progress <
-                        1.0 // not yet complete (updating in progress)
-                    ? UpdateWorking(
-                        percentage: updateState.progress,
-                      )
-                    : UpdateComplete()
-                : UpdateErrorMessage(
-                    error: updateState.error.reason,
-                    device: device,
-                  ),
+            // Display different widget depending on updateState.screen
+            if (updateState.error.code != 0)
+              UpdateErrorMessage(
+                  error: updateState.error.reason, device: device)
+            else if (updateState.screen == 'preparing-update')
+              PreparingUpdate()
+            else if (updateState.screen == 'update-working')
+              UpdateWorking(percentage: updateState.progress)
+            else if (updateState.screen == 'update-complete')
+              UpdateComplete()
+            else
+              UpdateErrorMessage(
+                error: 'unknown',
+                device: device,
+              )
           ],
         ),
       ),

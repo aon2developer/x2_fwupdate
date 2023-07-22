@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:x2_fwupdate/providers/update_provider.dart';
 
-class UpdateComplete extends StatelessWidget {
+class UpdateComplete extends ConsumerWidget {
   const UpdateComplete({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -33,6 +35,7 @@ class UpdateComplete extends StatelessWidget {
         ),
         ElevatedButton.icon(
           onPressed: () {
+            ref.read(updateProvider.notifier).resetErrors();
             Navigator.pop(context);
           },
           icon: Icon(

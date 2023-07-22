@@ -26,7 +26,8 @@ class _ProgressBarState extends ConsumerState<ProgressBar> {
           width: 20,
         ),
         Text(
-          '${widget.percentage * 100}%',
+          // Convert decimal to percentage (e.g. 0.3 to 30.0%)
+          '${(widget.percentage * 100).toInt()}%',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ],

@@ -46,6 +46,12 @@ class UpdateErrorMessage extends ConsumerWidget {
               ],
               link: 'https://www.aon2.co.uk/files/drivers/X2DriverPackage.zip',
             ),
+          if (error == 'unknown')
+            ErrorMessage(
+              title: 'Failed to update',
+              desc: 'Update error.',
+              help: ['Please try again.'],
+            ),
           SizedBox(
             height: 50,
           ),

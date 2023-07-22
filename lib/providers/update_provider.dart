@@ -10,23 +10,25 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
   UpdateNotifier()
       : super(
           UpdateStatus(
-            progress: -1.0,
+            progress: 0.0,
             error: UpdateError(
               code: 0,
               reason: '',
               driverInstalled: false,
             ),
+            screen: 'preparing-update',
           ),
         );
 
   void resetErrors() {
     state = UpdateStatus(
-      progress: -1.0,
+      progress: 0.0,
       error: UpdateError(
         code: -1, // special code to bypass entering bootloader mode
         reason: '',
         driverInstalled: true,
       ),
+      screen: 'preparing-update',
     );
   }
 
@@ -40,19 +42,52 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     if (_percentageValueSearchResult == null)
       return null;
     else {
-      // Convert matched string into double (0.0 to 1.0)
-      double _percentage = double.parse(_percentageValueSearchResult[0]!) /
-          100; // TODO: make int or round to nearest .0
+      // Convert matched string into double (0.00 to 1.00)
+      double _percentage = double.parse(_percentageValueSearchResult[0]!) / 100;
       return _percentage;
     }
   }
 
-  void updateDevice(SerialPort device) async {
-    Process process = await Process.start('echo', ['init_process']);
+  Future<Process> executeDfuUtil(String platform) async {
     double previousPercentage = state.progress;
 
+    Process process = await Process.start('./assets/util/dfu-util-$platform', [
+      '-d',
+      '0x16D0:0x0CC4,0x0483:0xdf11',
+      '-a',
+      '0',
+      '-s',
+      '0x08000000:leave',
+      '-D',
+      './assets/firmware/X2-1.3.6.dfu'
+    ]);
+
+    // Check each outputted line for percentage
+    await for (final line in process.outLines) {
+      print(line);
+
+      // TODO: find a way to optimise this? Unless you need to create a brand new object every time?
+      state = UpdateStatus(
+        error: state.error,
+        progress: parsePercentage(line) ?? previousPercentage,
+        screen: state.screen,
+      );
+
+      previousPercentage = state.progress;
+    }
+
+    return process;
+  }
+
+  void updateDevice(SerialPort device) async {
+    Process process = await Process.start('echo', ['init_process']);
+
+    state = UpdateStatus(
+        error: state.error,
+        progress: state.progress,
+        screen: 'preparing-update');
+
     if (Platform.isLinux) {
-      // TODO: implement this as a function, take variables that change as parameters
       if (state.error.code != -1) {
         // Activate bootloader mode
         process = await Process.start(
@@ -63,53 +98,58 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
           print('Bootloader mode could not be activated');
           state = UpdateStatus(
             error: UpdateError(code: await process.exitCode, reason: 'stty'),
-            progress: -1.0,
+            progress: state.progress,
+            screen: state.screen,
           );
           return;
         } else {
           print('Activated bootloader mode!');
         }
 
-        // Wait for bootloader mode to be activated
         // TODO: display 'preparing update' on screen with loading symbol
+        // Wait for bootloader mode to be activated
         sleep(
           Duration(seconds: 5),
         );
-        // process = await Process.start('sleep', ['5']);
       }
+      // print('Sleeping');
+      // process = await Process.start('sleep', ['5']);
+      // print('Awake');
 
-      // Try to update with dfu-util
-      process = await Process.start('./assets/util/dfu-util-linux', [
-        '-d',
-        '0x16D0:0x0CC4,0x0483:0xdf11',
-        '-a',
-        '0',
-        '-s',
-        '0x08000000:leave',
-        '-D',
-        './assets/firmware/X2-1.3.6.dfu'
-      ]);
+      state = UpdateStatus(
+          error: state.error,
+          progress: state.progress,
+          screen: 'update-working');
 
-      // Check each outputted line for percentage
-      await for (final line in process.outLines) {
-        print(line);
+      process = await executeDfuUtil('linux');
 
-        // TODO: find a way to optimise this? Unless you need to create a brand new object every time?
-        state = UpdateStatus(
-            error: UpdateError(code: 0, reason: ''),
-            progress: parsePercentage(line) ?? previousPercentage);
+      // // FOR TESTING PROGRESS BAR
+      // process = await Process.start('assets/util/percentage_parse_test.sh', []);
+      // double previousPercentage = state.progress;
+      // // Check each outputted line for percentage
+      // await for (final line in process.outLines) {
+      //   print(line);
 
-        previousPercentage = state.progress;
-      }
+      //   state = UpdateStatus(
+      //     error: UpdateError(code: 0, reason: ''),
+      //     progress: parsePercentage(line) ?? previousPercentage,
+      //     screen: state.screen,
+      //   );
 
-      // Check exit code for dfu-util after it finishes output
-      if (await process.exitCode != 0) {
-        print('Failed to complete update util');
-        state.error = UpdateError(code: await process.exitCode, reason: 'util');
-        return;
-      } else {
-        print('Update util done!');
-      }
+      //   previousPercentage = state.progress;
+      // }
+
+      // // Check exit code for dfu-util after it finishes output
+      // if (await process.exitCode != 0) {
+      //   print('Failed to complete update util');
+      //   state = UpdateStatus(
+      //     error: UpdateError(code: await process.exitCode, reason: 'util'),
+      //     progress: 0,
+      //   );
+      //   return;
+      // } else {
+      //   print('Update util done!');
+      // }
 
       // For each command, if fails, specify what failed for update_error.dart
     } else if (Platform.isMacOS)
@@ -134,6 +174,10 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
       print('Incompatable platform');
       process = await Process.start('echo', ['Incompatable', 'platform']);
     }
+    state = UpdateStatus(
+        error: state.error,
+        progress: state.progress,
+        screen: 'update-complete');
   }
 }
 
