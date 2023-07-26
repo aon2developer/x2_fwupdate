@@ -5,6 +5,8 @@ class PreparingUpdate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('Finished rendering prep screen');
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -18,6 +20,9 @@ class PreparingUpdate extends StatelessWidget {
         Text(
           'Please wait while we prepare your X2 to update...',
           style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        SizedBox(
+          height: 18,
         ),
         CircularProgressIndicator(),
       ],

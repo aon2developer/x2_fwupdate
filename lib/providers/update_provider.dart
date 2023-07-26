@@ -48,6 +48,34 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     }
   }
 
+  Future<Process> testUpdate() async {
+    print('Pretending to activate bootloader mode...');
+
+    print('Sleeping...');
+    sleep(
+      Duration(seconds: 5),
+    );
+    print('I have awoken!');
+
+    // FOR TESTING PROGRESS BAR
+    Process process =
+        await Process.start('assets/util/percentage_parse_test.sh', []);
+    double previousPercentage = state.progress;
+    // Check each outputted line for percentage
+    await for (final line in process.outLines) {
+      print(line);
+
+      state = UpdateStatus(
+        error: UpdateError(code: 0, reason: ''),
+        progress: parsePercentage(line) ?? previousPercentage,
+        screen: state.screen,
+      );
+
+      previousPercentage = state.progress;
+    }
+    return process;
+  }
+
   Future<Process> executeDfuUtil(String platform) async {
     double previousPercentage = state.progress;
 
@@ -79,6 +107,8 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
   }
 
   void updateDevice(SerialPort device) async {
+    // wait for preparing screen to render
+
     Process process = await Process.start('echo', ['init_process']);
 
     state = UpdateStatus(
@@ -106,13 +136,25 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
         }
 
         // Wait for bootloader mode to be activated
+        // TODO: wait in background to display the loading screen
+        // Find a way to wait until the next screen is fully rendered?
         sleep(
           Duration(seconds: 5),
         );
+
+        // // Temporary script until able to sleep without effecting rendering
+        // // Warning: does NOT error check
+        // process = await Process.start(
+        //   'assets/util/activate_bootloader.sh',
+        //   ['${device.name}'],
+        // );
+
+        // state = UpdateStatus(
+        //   error: UpdateError(code: await process.exitCode, reason: 'stty'),
+        //   progress: state.progress,
+        //   screen: state.screen,
+        // );
       }
-      // print('Sleeping');
-      // process = await Process.start('sleep', ['5']);
-      // print('Awake');
 
       state = UpdateStatus(
           error: state.error,
@@ -121,33 +163,19 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
 
       process = await executeDfuUtil('linux');
 
-      // // FOR TESTING PROGRESS BAR
-      // process = await Process.start('assets/util/percentage_parse_test.sh', []);
-      // double previousPercentage = state.progress;
-      // // Check each outputted line for percentage
-      // await for (final line in process.outLines) {
-      //   print(line);
+      // process = await testUpdate();
 
-      //   state = UpdateStatus(
-      //     error: UpdateError(code: 0, reason: ''),
-      //     progress: parsePercentage(line) ?? previousPercentage,
-      //     screen: state.screen,
-      //   );
-
-      //   previousPercentage = state.progress;
-      // }
-
-      // // Check exit code for dfu-util after it finishes output
-      // if (await process.exitCode != 0) {
-      //   print('Failed to complete update util');
-      //   state = UpdateStatus(
-      //     error: UpdateError(code: await process.exitCode, reason: 'util'),
-      //     progress: 0,
-      //   );
-      //   return;
-      // } else {
-      //   print('Update util done!');
-      // }
+      // Check exit code for dfu-util after it finishes output
+      if (await process.exitCode != 0) {
+        print('Failed to complete update util');
+        state = UpdateStatus(
+          error: UpdateError(code: await process.exitCode, reason: 'util'),
+          progress: 0,
+        );
+        return;
+      } else {
+        print('Update util done!');
+      }
 
       // For each command, if fails, specify what failed for update_error.dart
     } else if (Platform.isMacOS)

@@ -3,6 +3,7 @@ import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:x2_fwupdate/providers/devices_provider.dart';
+import 'package:x2_fwupdate/widgets/error_message.dart';
 import 'package:x2_fwupdate/widgets/update/update_confirmation.dart';
 
 class DeviceList extends ConsumerStatefulWidget {
@@ -60,14 +61,13 @@ class _DeviceListState extends ConsumerState<DeviceList> {
           padding: EdgeInsets.all(25),
           child: Column(
             children: [
-              Text(
-                'No devices found!',
-                style: Theme.of(context).textTheme.titleMedium,
+              ErrorMessage(
+                title: 'No devices found!',
+                desc: 'Try refreshing again...',
+                help: [
+                  'If this issue persists, try restarting your X2 by holding the top and middle bottons down at the same time for 10 seconds and turning it on again.',
+                ],
               ),
-              Text(
-                'Try refreshing again...',
-                style: Theme.of(context).textTheme.bodyLarge,
-              )
             ],
           ),
         ),

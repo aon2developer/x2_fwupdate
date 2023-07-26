@@ -17,6 +17,13 @@ class UpdateWorking extends StatelessWidget {
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         SizedBox(
+          height: 8,
+        ),
+        Text(
+          'Do not unplug your device.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        SizedBox(
           height: 50,
         ),
         ProgressBar(percentage: percentage),
