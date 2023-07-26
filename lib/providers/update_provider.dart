@@ -117,43 +117,21 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
         screen: 'preparing-update');
 
     if (Platform.isLinux) {
+      // -1 is a special bypass for enabling and checking boot loader mode
       if (state.error.code != -1) {
-        // Activate bootloader mode
+        // Enable boot loader mode
         process = await Process.start(
-          'stty',
-          ['-F', '${device.name}', '1200'],
+          'assets/util/bootloader-linux.sh',
+          ['${device.name}'],
         );
+
         if (await process.exitCode != 0) {
-          print('Bootloader mode could not be activated');
           state = UpdateStatus(
             error: UpdateError(code: await process.exitCode, reason: 'stty'),
             progress: state.progress,
             screen: state.screen,
           );
-          return;
-        } else {
-          print('Activated bootloader mode!');
         }
-
-        // Wait for bootloader mode to be activated
-        // TODO: wait in background to display the loading screen
-        // Find a way to wait until the next screen is fully rendered?
-        sleep(
-          Duration(seconds: 5),
-        );
-
-        // // Temporary script until able to sleep without effecting rendering
-        // // Warning: does NOT error check
-        // process = await Process.start(
-        //   'assets/util/activate_bootloader.sh',
-        //   ['${device.name}'],
-        // );
-
-        // state = UpdateStatus(
-        //   error: UpdateError(code: await process.exitCode, reason: 'stty'),
-        //   progress: state.progress,
-        //   screen: state.screen,
-        // );
       }
 
       state = UpdateStatus(
