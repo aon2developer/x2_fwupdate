@@ -109,6 +109,9 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
   void updateDevice(SerialPort device) async {
     // wait for preparing screen to render
 
+    // Use libserial port to port knock WITHOUT error checking
+    // Port knock: open port at 1200 baud, close port
+
     Process process = await Process.start('echo', ['init_process']);
 
     state = UpdateStatus(
@@ -169,8 +172,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
         return;
       }
 
-      process = await Process.start(
-          './assets/util/update-windows.sh', ['${device.name}']);
+      process = await executeDfuUtil('linux');
     }
 
     // TODO: raise error
