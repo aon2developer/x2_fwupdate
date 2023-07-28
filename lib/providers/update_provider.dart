@@ -81,6 +81,9 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
   }
 
   Future<Process> executeDfuUtil(String platform) async {
+    state = UpdateStatus(
+        error: state.error, progress: state.progress, screen: 'update-working');
+
     double previousPercentage = state.progress;
 
     Process process = await Process.start('./assets/util/dfu-util-$platform', [
@@ -129,17 +132,19 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     device.config.stopBits = 1;
     device.config = config;
 
-    // Wait for boot loader mode to activate
-    await Future.delayed(Duration(seconds: 5), () {});
-
-    state = UpdateStatus(
-        error: state.error, progress: state.progress, screen: 'update-working');
+    // Wait for boot loader mode to activate then begin update depending on
+    //  platform
 
     if (Platform.isLinux) {
+      await Future.delayed(Duration(seconds: 2), () {});
       process = await executeDfuUtil('linux');
     } else if (Platform.isMacOS) {
+      await Future.delayed(Duration(seconds: 5), () {});
+
       process = await executeDfuUtil('macos');
     } else if (Platform.isWindows) {
+      await Future.delayed(Duration(seconds: 5), () {});
+
       // Prompt user to ensure that they have installed the boot loader driver
       if (!state.error.driverInstalled!) {
         state = UpdateStatus(
