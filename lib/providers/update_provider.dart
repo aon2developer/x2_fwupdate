@@ -80,13 +80,13 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     return process;
   }
 
-  Future<Process> executeDfuUtil(String platform) async {
+  Future<Process> executeDfuUtil(String tag) async {
     state = UpdateStatus(
         error: state.error, progress: state.progress, screen: 'update-working');
 
     double previousPercentage = state.progress;
 
-    Process process = await Process.start('./assets/util/dfu-util-$platform', [
+    Process process = await Process.start('./assets/util/dfu-util$tag', [
       '-d',
       '0x16D0:0x0CC4,0x0483:0xdf11',
       '-a',
@@ -137,11 +137,11 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
 
     if (Platform.isLinux) {
       await Future.delayed(Duration(seconds: 2), () {});
-      process = await executeDfuUtil('linux');
+      process = await executeDfuUtil('-linux');
     } else if (Platform.isMacOS) {
       await Future.delayed(Duration(seconds: 5), () {});
 
-      process = await executeDfuUtil('macos');
+      process = await executeDfuUtil('-mac');
     } else if (Platform.isWindows) {
       await Future.delayed(Duration(seconds: 5), () {});
 
@@ -154,7 +154,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
         return;
       }
 
-      process = await executeDfuUtil('windows');
+      process = await executeDfuUtil('.exe');
     } else {
       print('Incompatable platform');
       process = await Process.start('echo', ['Incompatable', 'platform']);
