@@ -1,7 +1,9 @@
+import 'package:x2_fwupdate/errors/errors.dart';
+
 class UpdateError {
-  UpdateError({required this.code, required this.reason, this.driverInstalled});
+  UpdateError({required this.code, required this.type, this.driverInstalled});
 
   int code;
-  String reason;
+  ErrorType type;
   bool? driverInstalled = false;
 }

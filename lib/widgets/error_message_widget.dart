@@ -1,19 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:x2_fwupdate/models/error_message.dart';
 
 // TODO: turn into popup rather than enture new screen
-class ErrorMessage extends StatelessWidget {
-  ErrorMessage(
-      {required this.title,
-      required this.desc,
-      this.help,
-      this.link,
-      super.key});
+class ErrorMessageWidget extends StatelessWidget {
+  ErrorMessageWidget({super.key, required this.error});
 
-  final String title;
-  final String desc;
-  final List<String>? help;
-  final String? link;
+  final ErrorMessage error;
 
   @override
   Widget build(BuildContext context) {
@@ -25,14 +18,14 @@ class ErrorMessage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              title,
+              error.title,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             SizedBox(
               height: 30,
             ),
             Text(
-              desc,
+              error.desc,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             SizedBox(
@@ -46,7 +39,7 @@ class ErrorMessage extends StatelessWidget {
               padding: EdgeInsets.all(20),
               child: Column(
                 children: [
-                  if (help != null)
+                  if (error.help != null)
                     Icon(
                       Icons.info,
                       size: 50,
@@ -55,7 +48,7 @@ class ErrorMessage extends StatelessWidget {
                   SizedBox(
                     width: 20,
                   ),
-                  for (final String string in help!)
+                  for (final String string in error.help!)
                     Text(
                       string,
                       style: Theme.of(context).textTheme.bodyLarge!.copyWith(
@@ -63,7 +56,7 @@ class ErrorMessage extends StatelessWidget {
                           ),
                       textAlign: TextAlign.center,
                     ),
-                  if (link != null)
+                  if (error.link != null)
                     Container(
                       width: 400,
                       height: 120,
@@ -78,11 +71,11 @@ class ErrorMessage extends StatelessWidget {
                               ),
                               child: InkWell(
                                 onTap: () async {
-                                  print('Sending to $link');
-                                  await launchUrl(Uri.parse(link!));
+                                  print('Sending to ${error.link}');
+                                  await launchUrl(Uri.parse(error.link!));
                                 },
                                 child: Text(
-                                  link!,
+                                  error.link!,
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyLarge!
