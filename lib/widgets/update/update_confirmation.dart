@@ -78,8 +78,6 @@ class _UpdateConfirmationState extends ConsumerState<UpdateConfirmation> {
                 ),
               ),
             );
-            // TODO: Render different screen that requires less time to render?
-            print('Began to render the update screen');
             ref.read(updateProvider.notifier).updateDevice(device);
           },
           child: Text('Yes, update!'),

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:x2_fwupdate/providers/devices_provider.dart';
+import 'package:x2_fwupdate/providers/update_provider.dart';
+import 'package:x2_fwupdate/widgets/update/update_confirmation.dart';
 
 class Buttons extends ConsumerStatefulWidget {
   Buttons({super.key});
@@ -41,12 +43,18 @@ class _ButtonsState extends ConsumerState<Buttons> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             ElevatedButton.icon(
-              onPressed: () {
-                // TODO: display 'refreshed!'
+              onPressed: () async {
                 setState(() {
                   _opacity = 1.0;
                 });
-                ref.read(devicesProvider.notifier).findX2Devices();
+
+                String x2State =
+                    await ref.read(devicesProvider.notifier).findX2Devices();
+
+                if (x2State == 'ready') {
+                  print('Starting update from boot loader mode!');
+                  ref.read(updateProvider.notifier).executeUpdate();
+                }
               },
               icon: Icon(
                 Icons.refresh,
