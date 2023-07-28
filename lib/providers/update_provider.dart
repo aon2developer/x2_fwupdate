@@ -128,28 +128,32 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     /// PORT KNOCK ///
     // -1 is a special bypass for enabling and checking boot loader mode
     if (state.error.code != -1) {
-      // Enable boot loader mode
-      process = await Process.start(
-        'assets/util/bootloader-linux.sh',
-        ['${device.name}'],
-      );
+      // // Enable boot loader mode
+      // process = await Process.start(
+      //   'assets/util/bootloader-linux.sh',
+      //   ['${device.name}'],
+      // );
 
-      if (await process.exitCode != 0) {
-        state = UpdateStatus(
-          error: UpdateError(code: 1, type: ErrorType.stty),
-          progress: -1.0,
-        );
-        return;
-      }
+      // if (await process.exitCode != 0) {
+      //   state = UpdateStatus(
+      //     error: UpdateError(code: 1, type: ErrorType.stty),
+      //     progress: -1.0,
+      //   );
+      //   return;
+      // }
 
-      // SerialPortConfig portConfig = SerialPortConfig();
-      // portConfig.baudRate = 1200;
-      // device.config = portConfig;
+      device.openWrite();
+      var config = device.config;
+      config.baudRate = 1200;
+      device.config = config;
+      device.config.rts = 1;
+      device.config.dtr = 0;
+      device.config.bits = 8;
+      device.config.stopBits = 1;
+      device.config = config;
 
-      // device.openReadWrite();
-
-      // print(
-      //     '${device.name} ${device.isOpen ? 'is open at ${device.config.baudRate}' : 'is closed'}');
+      print(
+          '${device.name} ${device.isOpen ? 'is open at ${device.config.baudRate}' : 'is closed'}');
 
       // try {
       //   final writtenBytes =
@@ -164,10 +168,10 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
       //       '${device.name} ${device.isOpen ? 'is open at ${device.config.baudRate}' : 'is closed'}');
       // }
 
-      // device.close();
+      device.close();
 
-      // print(
-      //     '${device.name} ${device.isOpen ? 'is open at ${device.config.baudRate}' : 'is closed'}');
+      print(
+          '${device.name} ${device.isOpen ? 'is open at ${device.config.baudRate}' : 'is closed'}');
 
       ///
     }
