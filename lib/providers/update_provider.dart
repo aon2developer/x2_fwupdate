@@ -121,8 +121,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
 
     if (Platform.isLinux) {
       await Future.delayed(Duration(seconds: 2), () {});
-      // process = await executeDfuUtil('-linux');
-      process = await testUpdate();
+      process = await executeDfuUtil('-linux');
     } else if (Platform.isMacOS) {
       await Future.delayed(Duration(seconds: 5), () {});
 

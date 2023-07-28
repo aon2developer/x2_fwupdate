@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:x2_fwupdate/providers/devices_provider.dart';
 import 'package:x2_fwupdate/providers/update_provider.dart';
+import 'package:x2_fwupdate/screens/update_screen.dart';
 import 'package:x2_fwupdate/widgets/update/update_confirmation.dart';
 
 class Buttons extends ConsumerStatefulWidget {
@@ -52,8 +53,47 @@ class _ButtonsState extends ConsumerState<Buttons> {
                     await ref.read(devicesProvider.notifier).findX2Devices();
 
                 if (x2State == 'ready') {
-                  print('Starting update from boot loader mode!');
-                  ref.read(updateProvider.notifier).executeUpdate();
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: Text(
+                        'Are you sure that you want to update this device?',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Your device is already prepared to be updated.',
+                          )
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            print('Cancel update');
+                            Navigator.pop(context);
+                          },
+                          child: Text('No, cancel.'),
+                        ),
+                        TextButton(
+                          // Go to update screen and begin update
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (ctx) => UpdateScreen(),
+                              ),
+                            );
+                            print('Starting update from boot loader mode!');
+                            ref.read(updateProvider.notifier).executeUpdate();
+                          },
+                          child: Text('Yes, update!'),
+                        ),
+                      ],
+                    ),
+                  );
                 }
               },
               icon: Icon(
