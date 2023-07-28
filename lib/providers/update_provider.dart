@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:process_run/shell.dart';
+
 import 'package:x2_fwupdate/errors/errors.dart';
 import 'package:x2_fwupdate/models/update_error.dart';
 import 'package:x2_fwupdate/models/update_status.dart';
@@ -26,7 +26,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     state = UpdateStatus(
       progress: 0.0,
       error: UpdateError(
-        code: -1, // special code to bypass entering bootloader mode
+        code: 0,
         type: ErrorType.unknown,
         driverInstalled: true,
       ),
@@ -34,6 +34,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     );
   }
 
+  // Takes a string and returns the percentage, if found, as a decimal
   double? parsePercentage(String line) {
     // Find percentage value
     RegExp _percentageValueSearch = RegExp(r'(\d{1,})(?=%)');
@@ -50,6 +51,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     }
   }
 
+  // TODO: remove on release
   Future<Process> testUpdate() async {
     print('Pretending to activate bootloader mode...');
 
@@ -108,37 +110,27 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     return process;
   }
 
-  // Temporary for testing writing to port
-  Uint8List _stringToUint8List(String data) {
-    List<int> codeUnits = data.codeUnits;
-    Uint8List uint8list = Uint8List.fromList(codeUnits);
-    return uint8list;
-  }
-
   void updateDevice(SerialPort device) async {
-    final process;
+    final Process? process;
 
     state = UpdateStatus(
         error: state.error,
         progress: state.progress,
         screen: 'preparing-update');
 
-    // -1 is a special bypass for enabling and checking boot loader mode
-    if (state.error.code != -1) {
-      // Enable boot loader mode
-      device.openWrite();
-      var config = device.config;
-      config.baudRate = 1200;
-      device.config = config;
-      device.config.rts = 1;
-      device.config.dtr = 0;
-      device.config.bits = 8;
-      device.config.stopBits = 1;
-      device.config = config;
+    // Enable boot loader mode
+    device.openWrite();
+    var config = device.config;
+    config.baudRate = 1200;
+    device.config = config;
+    device.config.rts = 1;
+    device.config.dtr = 0;
+    device.config.bits = 8;
+    device.config.stopBits = 1;
+    device.config = config;
 
-      // Wait for boot loader mode to activate
-      await Future.delayed(Duration(seconds: 5), () {});
-    }
+    // Wait for boot loader mode to activate
+    await Future.delayed(Duration(seconds: 5), () {});
 
     state = UpdateStatus(
         error: state.error, progress: state.progress, screen: 'update-working');
@@ -157,8 +149,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
         return;
       }
 
-      process = await Process.start(
-          './assets/util/update-windows.sh', ['${device.name}']);
+      process = await executeDfuUtil('windows');
     } else {
       print('Incompatable platform');
       process = await Process.start('echo', ['Incompatable', 'platform']);
@@ -173,7 +164,8 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     if (await process.exitCode != 0) {
       print('Failed to complete update util');
       state = UpdateStatus(
-        error: UpdateError(code: await process.exitCode, type: ErrorType.util),
+        error:
+            UpdateError(code: await process.exitCode, type: ErrorType.update),
         progress: 0,
       );
       return;

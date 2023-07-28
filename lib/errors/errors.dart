@@ -2,30 +2,17 @@ import 'package:x2_fwupdate/models/error_message.dart';
 
 enum ErrorType {
   unknown,
-  stty,
-  util,
+  update,
   noDriver,
   incompatablePlatform,
 }
 
 Map<ErrorType, ErrorMessage> errorContent = {
-  ErrorType.unknown: ErrorMessage(
+  ErrorType.update: ErrorMessage(
     title: 'Failed to update',
-    desc: 'Update error.',
-    help: ['Please try again.'],
-  ),
-  ErrorType.stty: ErrorMessage(
-    title: 'Failed to prepare for update',
-    desc: 'Could not activate boot loader mode',
+    desc: 'An error occured while attempting to update your X2.',
     help: [
-      'If this happens again, try holding down the top and middle buttons at the same time for 20 seconds.'
-    ],
-  ),
-  ErrorType.util: ErrorMessage(
-    title: 'Failed to start update...',
-    desc: 'Issue with dfu-util',
-    help: [
-      'To fix this, hold the middle and top buttons for 20 seconds to shutdown the X2 and try again.',
+      'If this issue persists, try rebooting your X2 by holding down the middle button for 10 seconds.'
     ],
   ),
   ErrorType.noDriver: ErrorMessage(
