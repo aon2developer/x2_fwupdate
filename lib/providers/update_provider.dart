@@ -116,32 +116,16 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
   }
 
   void updateDevice(SerialPort device) async {
-    // wait for preparing screen to render
-
-    Process process = await Process.start('echo', ['init_process']);
+    final process;
 
     state = UpdateStatus(
         error: state.error,
         progress: state.progress,
         screen: 'preparing-update');
 
-    /// PORT KNOCK ///
     // -1 is a special bypass for enabling and checking boot loader mode
     if (state.error.code != -1) {
-      // // Enable boot loader mode
-      // process = await Process.start(
-      //   'assets/util/bootloader-linux.sh',
-      //   ['${device.name}'],
-      // );
-
-      // if (await process.exitCode != 0) {
-      //   state = UpdateStatus(
-      //     error: UpdateError(code: 1, type: ErrorType.stty),
-      //     progress: -1.0,
-      //   );
-      //   return;
-      // }
-
+      // Enable boot loader mode
       device.openWrite();
       var config = device.config;
       config.baudRate = 1200;
@@ -152,38 +136,18 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
       device.config.stopBits = 1;
       device.config = config;
 
-      print(
-          '${device.name} ${device.isOpen ? 'is open at ${device.config.baudRate}' : 'is closed'}');
-
-      // try {
-      //   final writtenBytes =
-      //       device.write(_stringToUint8List('an amount of bytes?'));
-      //   print('Bytes written: $writtenBytes');
-
-      //   print(
-      //       '${device.name} ${device.isOpen ? 'is open at ${device.config.baudRate}' : 'is closed'}');
-      // } on SerialPortError catch (err, _) {
-      //   print(SerialPort.lastError);
-      //   print(
-      //       '${device.name} ${device.isOpen ? 'is open at ${device.config.baudRate}' : 'is closed'}');
-      // }
-
-      device.close();
-
-      print(
-          '${device.name} ${device.isOpen ? 'is open at ${device.config.baudRate}' : 'is closed'}');
-
-      ///
+      // Wait for boot loader mode to activate
+      await Future.delayed(Duration(seconds: 5), () {});
     }
 
     state = UpdateStatus(
         error: state.error, progress: state.progress, screen: 'update-working');
 
-    if (Platform.isLinux)
+    if (Platform.isLinux) {
       process = await executeDfuUtil('linux');
-    else if (Platform.isMacOS)
+    } else if (Platform.isMacOS) {
       process = await executeDfuUtil('macos');
-    else if (Platform.isWindows) {
+    } else if (Platform.isWindows) {
       // Prompt user to ensure that they have installed the boot loader driver
       if (!state.error.driverInstalled!) {
         state = UpdateStatus(
