@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:x2_fwupdate/errors/errors.dart';
 import 'package:x2_fwupdate/models/error_message.dart';
 
 import 'package:x2_fwupdate/providers/devices_provider.dart';
+import 'package:x2_fwupdate/providers/driver_downloaded_provider.dart';
 import 'package:x2_fwupdate/widgets/error_message_widget.dart';
 import 'package:x2_fwupdate/widgets/update/update_confirmation.dart';
 
@@ -15,14 +19,51 @@ class DeviceList extends ConsumerStatefulWidget {
 }
 
 class _DeviceListState extends ConsumerState<DeviceList> {
+  void _showCheckDownloadAlert(context) {
+    showDialog(
+        context: context,
+        builder: (context) => StatefulBuilder(builder: (context, setState) {
+              return AlertDialog(
+                title: Text('Have you downloaded the driver?'),
+                content: Text('Ensure that the driver is installed!'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      ref
+                          .read(driverDownloadedProvider.notifier)
+                          .setDriverDownloaded(true);
+                      Navigator.pop(context);
+                    },
+                    child: Text('I\'ve downloaded the driver'),
+                  ),
+                ],
+              );
+            }));
+  }
+
+  void _showDownloadAlert(context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: ErrorMessageWidget(error: errorContent[ErrorType.noDriver]!),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _showCheckDownloadAlert(context);
+            },
+            child: Text('Download'),
+          ),
+        ],
+      ),
+    );
+  }
+
   _selectDevice(SerialPort device) {
     showDialog(
       context: context,
       builder: (ctx) => UpdateConfirmation(selectedDevice: device),
     );
-
-    // true: start update (seperate function)
-    // false: disregaurd selectede device
   }
 
   @override
@@ -38,6 +79,7 @@ class _DeviceListState extends ConsumerState<DeviceList> {
   Widget build(BuildContext context) {
     final availableDevices = ref.watch(devicesProvider);
     print(availableDevices);
+    bool driverDownloaded = ref.watch(driverDownloadedProvider);
 
     List<Widget> content = [];
 
@@ -58,7 +100,10 @@ class _DeviceListState extends ConsumerState<DeviceList> {
                   ),
             ),
             onTap: () {
-              _selectDevice(device);
+              if (Platform.isWindows && !driverDownloaded)
+                _showDownloadAlert(context);
+              else
+                _selectDevice(device);
             },
           ),
         ));

@@ -2,8 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:quick_usb/quick_usb.dart';
 
-// TODO: check if the device is showing as boot loader
-
 class AvailableDevicesNotifier extends StateNotifier<List<SerialPort>> {
   AvailableDevicesNotifier() : super([]);
 
@@ -14,7 +12,6 @@ class AvailableDevicesNotifier extends StateNotifier<List<SerialPort>> {
     for (final port in availablePorts) {
       final device = SerialPort(port);
 
-      // TODO: Device displays twice -> prevent duplicates
       if (device.productName == 'X2' && device.manufacturer == 'AON2 Ltd') {
         filteredPorts.add(device);
       }

@@ -129,16 +129,6 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     } else if (Platform.isWindows) {
       await Future.delayed(Duration(seconds: 5), () {});
 
-      // TODO: find a better way to check this or simply just display a message on boot if windows (this will prevent null check errors)
-      // Prompt user to ensure that they have installed the boot loader driver
-      if (!state.error.driverInstalled!) {
-        state = UpdateStatus(
-          error: UpdateError(code: 1, type: ErrorType.noDriver),
-          progress: -1.0,
-        );
-        return;
-      }
-
       process = await executeDfuUtil('.exe');
     } else {
       print('Incompatable platform');
@@ -151,11 +141,11 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     }
 
     // Ensure dfu-util exits successfully
-    if (await process!.exitCode != 0) {
+    if (await process.exitCode != 0) {
       print('Failed to complete update util');
       state = UpdateStatus(
         error:
-            UpdateError(code: await process!.exitCode, type: ErrorType.update),
+            UpdateError(code: await process.exitCode, type: ErrorType.update),
         progress: 0,
       );
       return;
