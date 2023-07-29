@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:process_run/shell.dart';
+
+import 'package:x2_fwupdate/errors/errors.dart';
 import 'package:x2_fwupdate/models/update_error.dart';
 import 'package:x2_fwupdate/models/update_status.dart';
 
@@ -13,7 +15,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
             progress: 0.0,
             error: UpdateError(
               code: 0,
-              reason: '',
+              type: ErrorType.unknown,
               driverInstalled: false,
             ),
             screen: 'preparing-update',
@@ -24,14 +26,15 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     state = UpdateStatus(
       progress: 0.0,
       error: UpdateError(
-        code: -1, // special code to bypass entering bootloader mode
-        reason: '',
+        code: 0,
+        type: ErrorType.unknown,
         driverInstalled: true,
       ),
       screen: 'preparing-update',
     );
   }
 
+  // Takes a string and returns the percentage, if found, as a decimal
   double? parsePercentage(String line) {
     // Find percentage value
     RegExp _percentageValueSearch = RegExp(r'(\d{1,})(?=%)');
@@ -48,6 +51,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     }
   }
 
+  // TODO: remove on release
   Future<Process> testUpdate() async {
     print('Pretending to activate bootloader mode...');
 
@@ -66,7 +70,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
       print(line);
 
       state = UpdateStatus(
-        error: UpdateError(code: 0, reason: ''),
+        error: UpdateError(code: 0, type: ErrorType.unknown),
         progress: parsePercentage(line) ?? previousPercentage,
         screen: state.screen,
       );
@@ -76,10 +80,13 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     return process;
   }
 
-  Future<Process> executeDfuUtil(String platform) async {
+  Future<Process> executeDfuUtil(String tag) async {
+    state = UpdateStatus(
+        error: state.error, progress: state.progress, screen: 'update-working');
+
     double previousPercentage = state.progress;
 
-    Process process = await Process.start('./assets/util/dfu-util-$platform', [
+    Process process = await Process.start('./assets/util/dfu-util$tag', [
       '-d',
       '0x16D0:0x0CC4,0x0483:0xdf11',
       '-a',
@@ -107,79 +114,71 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
   }
 
   void updateDevice(SerialPort device) async {
-    // wait for preparing screen to render
-
-    // Use libserial port to port knock WITHOUT error checking
-    // Port knock: open port at 1200 baud, close port
-
-    Process process = await Process.start('echo', ['init_process']);
+    final Process? process;
 
     state = UpdateStatus(
         error: state.error,
         progress: state.progress,
         screen: 'preparing-update');
 
+    // Enable boot loader mode
+    device.openWrite();
+    var config = device.config;
+    config.baudRate = 1200;
+    device.config = config;
+    device.config.rts = 1;
+    device.config.dtr = 0;
+    device.config.bits = 8;
+    device.config.stopBits = 1;
+    device.config = config;
+
+    // Wait for boot loader mode to activate then begin update depending on
+    //  platform
+
     if (Platform.isLinux) {
-      // -1 is a special bypass for enabling and checking boot loader mode
-      if (state.error.code != -1) {
-        // Enable boot loader mode
-        process = await Process.start(
-          'assets/util/bootloader-linux.sh',
-          ['${device.name}'],
-        );
+      await Future.delayed(Duration(seconds: 2), () {});
+      process = await executeDfuUtil('-linux');
+    } else if (Platform.isMacOS) {
+      await Future.delayed(Duration(seconds: 5), () {});
 
-        if (await process.exitCode != 0) {
-          state = UpdateStatus(
-            error: UpdateError(code: await process.exitCode, reason: 'stty'),
-            progress: state.progress,
-            screen: state.screen,
-          );
-        }
-      }
+      process = await executeDfuUtil('-mac');
+    } else if (Platform.isWindows) {
+      await Future.delayed(Duration(seconds: 5), () {});
 
-      state = UpdateStatus(
-          error: state.error,
-          progress: state.progress,
-          screen: 'update-working');
-
-      process = await executeDfuUtil('linux');
-
-      // process = await testUpdate();
-
-      // Check exit code for dfu-util after it finishes output
-      if (await process.exitCode != 0) {
-        print('Failed to complete update util');
-        state = UpdateStatus(
-          error: UpdateError(code: await process.exitCode, reason: 'util'),
-          progress: 0,
-        );
-        return;
-      } else {
-        print('Update util done!');
-      }
-
-      // For each command, if fails, specify what failed for update_error.dart
-    } else if (Platform.isMacOS)
-      process = await Process.start(
-          './assets/util/update-macos.sh', ['${device.name}']);
-    else if (Platform.isWindows) {
-      // prompt user to ensure that htey have installed the boot loader driver
+      // Prompt user to ensure that they have installed the boot loader driver
       if (!state.error.driverInstalled!) {
         state = UpdateStatus(
-          error: UpdateError(code: 1, reason: 'no-driver'),
+          error: UpdateError(code: 1, type: ErrorType.noDriver),
           progress: -1.0,
         );
         return;
       }
 
-      process = await executeDfuUtil('linux');
-    }
-
-    // TODO: raise error
-    else {
+      process = await executeDfuUtil('.exe');
+    } else {
       print('Incompatable platform');
       process = await Process.start('echo', ['Incompatable', 'platform']);
+      state = UpdateStatus(
+        error: UpdateError(code: 1, type: ErrorType.incompatablePlatform),
+        progress: 0,
+      );
+      return;
     }
+
+    // Ensure dfu-util exits successfully
+    if (await process.exitCode != 0) {
+      print('Failed to complete update util');
+      state = UpdateStatus(
+        error:
+            UpdateError(code: await process.exitCode, type: ErrorType.update),
+        progress: 0,
+      );
+      return;
+    } else {
+      print('Update util done!');
+    }
+
+    // Only gets here when passed all error tests and have "awaited" all processes
     state = UpdateStatus(
         error: state.error,
         progress: state.progress,

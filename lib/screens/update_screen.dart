@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:x2_fwupdate/errors/errors.dart';
 import 'package:x2_fwupdate/providers/update_provider.dart';
 import 'package:x2_fwupdate/widgets/update/preparing_update.dart';
 import 'package:x2_fwupdate/widgets/update/update_complete.dart';
@@ -30,7 +31,9 @@ class UpdateScreen extends ConsumerWidget {
             // Display different widget depending on updateState.screen
             if (updateState.error.code != 0)
               UpdateErrorMessage(
-                  error: updateState.error.reason, device: device)
+                  error: errorContent[updateState.error.type] ??
+                      errorContent[ErrorType.unknown]!,
+                  device: device)
             else if (updateState.screen == 'preparing-update')
               PreparingUpdate()
             else if (updateState.screen == 'update-working')
@@ -39,7 +42,7 @@ class UpdateScreen extends ConsumerWidget {
               UpdateComplete()
             else
               UpdateErrorMessage(
-                error: 'unknown',
+                error: errorContent[ErrorType.unknown]!,
                 device: device,
               )
           ],
