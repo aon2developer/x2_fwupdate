@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:x2_fwupdate/widgets/buttons.dart';
 import 'package:x2_fwupdate/widgets/device_list.dart';
+import 'package:x2_fwupdate/widgets/footer.dart';
 
 class DeviceScreen extends ConsumerStatefulWidget {
   const DeviceScreen({super.key});
@@ -62,21 +63,7 @@ class _DeviceScreenState extends ConsumerState<DeviceScreen> {
               DeviceList(),
             ],
           ),
-
-          // TODO: make persistent on every screen
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Image.asset(
-                  'assets/images/aon2-logo-white.png',
-                  width: 200,
-                ),
-                Text('Copyright AON2'),
-              ],
-            ),
-          ),
+          Footer(),
         ],
       ),
     );
