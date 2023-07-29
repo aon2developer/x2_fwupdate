@@ -45,10 +45,10 @@ packages:
     dependency: transitive
     description:
       name: ffi
-      sha256: a38574032c5f1dd06c4aee541789906c12ccaab8ba01446e800d9c5b79c4a978
+      sha256: "13a6ccf6a459a125b3fcdb6ec73bd5ff90822e071207c663bfd1f70062d51d18"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.1"
+    version: "1.2.1"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -58,10 +58,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_libserialport
-      sha256: "34cc4909eaa5b1502b9e1ad5a7dc597542f009d9adfa37c9a86ae0fb0d3b13fa"
+      sha256: f3404f5ff4dfe714dedc41003323be662eeca542ff05495118f8d3fcb58e68f9
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.2.3"
   flutter_riverpod:
     dependency: "direct main"
     description:
@@ -87,10 +87,18 @@ packages:
     dependency: transitive
     description:
       name: libserialport
-      sha256: "392e1592def65282429832ec66fa25e9e163d3b37716b97691482e2406720727"
+      sha256: eddc9e648270ba47ab71e5551b63e40f1d7e157d88c7e95ed67474453f85dfe0
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0+1"
+    version: "0.2.0+3"
+  libusb:
+    dependency: transitive
+    description:
+      name: libusb
+      sha256: ca24c95f475eb53fac4dcdcd754b5a0b1b04d0bbf744f61163ae5d59197471c6
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.23+2"
   loading_animation_widget:
     dependency: "direct main"
     description:
@@ -143,10 +151,10 @@ packages:
     dependency: "direct main"
     description:
       name: process_run
-      sha256: "0071cece7ca0fdf4aaf2cf84ee3082f3043f18afc7fcfd51f53f9424a8072c04"
+      sha256: ceacfac6d566a36c895d64edc7e429efb2d6b6303b5e28d5c13bc59fe6e8974e
       url: "https://pub.dev"
     source: hosted
-    version: "0.13.0"
+    version: "0.13.1"
   pub_semver:
     dependency: transitive
     description:
@@ -155,6 +163,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+  quick_usb:
+    dependency: "direct main"
+    description:
+      name: quick_usb
+      sha256: ebc26ec1e9d74594441e03a86060a468197caba19e69060cf0e86348930b9ac4
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
   riverpod:
     dependency: transitive
     description:

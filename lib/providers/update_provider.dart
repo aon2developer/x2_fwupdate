@@ -81,9 +81,6 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
   }
 
   Future<Process> executeDfuUtil(String tag) async {
-    state = UpdateStatus(
-        error: state.error, progress: state.progress, screen: 'update-working');
-
     double previousPercentage = state.progress;
 
     Process process = await Process.start('./assets/util/dfu-util$tag', [
@@ -113,24 +110,11 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     return process;
   }
 
-  void updateDevice(SerialPort device) async {
-    final Process? process;
-
+  void executeUpdate() async {
     state = UpdateStatus(
-        error: state.error,
-        progress: state.progress,
-        screen: 'preparing-update');
+        error: state.error, progress: state.progress, screen: 'update-working');
 
-    // Enable boot loader mode
-    device.openWrite();
-    var config = device.config;
-    config.baudRate = 1200;
-    device.config = config;
-    device.config.rts = 1;
-    device.config.dtr = 0;
-    device.config.bits = 8;
-    device.config.stopBits = 1;
-    device.config = config;
+    Process? process;
 
     // Wait for boot loader mode to activate then begin update depending on
     //  platform
@@ -166,11 +150,11 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     }
 
     // Ensure dfu-util exits successfully
-    if (await process.exitCode != 0) {
+    if (await process!.exitCode != 0) {
       print('Failed to complete update util');
       state = UpdateStatus(
         error:
-            UpdateError(code: await process.exitCode, type: ErrorType.update),
+            UpdateError(code: await process!.exitCode, type: ErrorType.update),
         progress: 0,
       );
       return;
@@ -183,6 +167,26 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
         error: state.error,
         progress: state.progress,
         screen: 'update-complete');
+  }
+
+  void updateDevice(SerialPort device) async {
+    state = UpdateStatus(
+        error: state.error,
+        progress: state.progress,
+        screen: 'preparing-update');
+
+    // Enable boot loader mode
+    device.openWrite();
+    var config = device.config;
+    config.baudRate = 1200;
+    device.config = config;
+    device.config.rts = 1;
+    device.config.dtr = 0;
+    device.config.bits = 8;
+    device.config.stopBits = 1;
+    device.config = config;
+
+    executeUpdate();
   }
 }
 

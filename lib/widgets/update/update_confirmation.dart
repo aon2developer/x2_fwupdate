@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:process_run/shell.dart';
+import 'package:x2_fwupdate/providers/selected_device_provider.dart';
 import 'package:x2_fwupdate/providers/update_provider.dart';
 
 import 'package:x2_fwupdate/screens/update_screen.dart';
@@ -73,13 +74,10 @@ class _UpdateConfirmationState extends ConsumerState<UpdateConfirmation> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (ctx) => UpdateScreen(
-                  selectedDevice: device,
-                ),
+                builder: (ctx) => UpdateScreen(),
               ),
             );
-            // TODO: Render different screen that requires less time to render?
-            print('Began to render the update screen');
+            ref.read(selectedDeviceProvider.notifier).selectDevice(device);
             ref.read(updateProvider.notifier).updateDevice(device);
           },
           child: Text('Yes, update!'),
