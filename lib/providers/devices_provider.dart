@@ -14,6 +14,7 @@ class AvailableDevicesNotifier extends StateNotifier<List<SerialPort>> {
     for (final port in availablePorts) {
       final device = SerialPort(port);
 
+      // TODO: Device displays twice -> prevent duplicates
       if (device.productName == 'X2' && device.manufacturer == 'AON2 Ltd') {
         filteredPorts.add(device);
       }

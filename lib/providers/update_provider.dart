@@ -111,6 +111,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
   }
 
   void executeUpdate() async {
+    // TODO: this is displaying BEFORE the timer. Make it display after the time ends
     state = UpdateStatus(
         error: state.error, progress: state.progress, screen: 'update-working');
 
@@ -129,6 +130,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     } else if (Platform.isWindows) {
       await Future.delayed(Duration(seconds: 5), () {});
 
+      // TODO: find a better way to check this or simply just display a message on boot if windows (this will prevent null check errors)
       // Prompt user to ensure that they have installed the boot loader driver
       if (!state.error.driverInstalled!) {
         state = UpdateStatus(
