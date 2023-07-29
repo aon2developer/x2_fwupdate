@@ -81,6 +81,9 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
   }
 
   Future<Process> executeDfuUtil(String tag) async {
+    state = UpdateStatus(
+        error: state.error, progress: state.progress, screen: 'update-working');
+
     double previousPercentage = state.progress;
 
     Process process = await Process.start('./assets/util/dfu-util$tag', [
@@ -111,10 +114,6 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
   }
 
   void executeUpdate() async {
-    // TODO: this is displaying BEFORE the timer. Make it display after the time ends
-    state = UpdateStatus(
-        error: state.error, progress: state.progress, screen: 'update-working');
-
     Process? process;
 
     // Wait for boot loader mode to activate then begin update depending on

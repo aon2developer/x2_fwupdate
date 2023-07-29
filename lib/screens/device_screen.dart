@@ -13,11 +13,11 @@ class DeviceScreen extends ConsumerWidget {
       decoration: BoxDecoration(color: Theme.of(context).primaryColorDark),
       padding: EdgeInsets.all(24),
       width: double.infinity, // TODO: make use of entire horizonal space
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(children: [
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -55,24 +55,24 @@ class DeviceScreen extends ConsumerWidget {
                 height: 12,
               ),
               DeviceList(),
-            ]),
+            ],
+          ),
 
-            // TODO: make persistent on every screen
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Image.asset(
-                    'assets/images/aon2-logo-white.png',
-                    width: 200,
-                  ),
-                  Text('Copyright AON2'),
-                ],
-              ),
+          // TODO: make persistent on every screen
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Image.asset(
+                  'assets/images/aon2-logo-white.png',
+                  width: 200,
+                ),
+                Text('Copyright AON2'),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

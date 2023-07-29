@@ -43,16 +43,24 @@ class _DeviceListState extends ConsumerState<DeviceList> {
 
     if (availableDevices.isNotEmpty) {
       for (final device in availableDevices) {
-        content.add(ListTile(
-          title: Text(
-            '${device.productName} by ${device.manufacturer}',
-            style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                  color: Colors.white,
-                ),
+        content.add(Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Theme.of(context).colorScheme.primary,
+              width: 2,
+            ),
           ),
-          onTap: () {
-            _selectDevice(device);
-          },
+          child: ListTile(
+            title: Text(
+              '${device.productName} by ${device.manufacturer}',
+              style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                    color: Colors.white,
+                  ),
+            ),
+            onTap: () {
+              _selectDevice(device);
+            },
+          ),
         ));
       }
     } else {
@@ -77,12 +85,17 @@ class _DeviceListState extends ConsumerState<DeviceList> {
       ];
     }
 
-    return SingleChildScrollView(
-      child: Container(
-        margin: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.grey[850],
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[850],
+      ),
+      padding: EdgeInsets.all(4),
+      margin: EdgeInsets.all(12),
+      // TODO: make use of all available space
+
+      height: 400,
+      // TODO: make scroll if content does not fit in available space
+      child: SingleChildScrollView(
         child: Column(
           children: [
             for (final device in content)
