@@ -21,6 +21,8 @@ dependencies:
   loading_animation_widget: ^1.2.0+4
   process_run: ^0.13.1
   url_launcher: ^6.1.12
+  http: ^1.1.0
+  background_downloader: ^7.8.1
 
 flutter:
   uses-material-design: true

@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:background_downloader/background_downloader.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:process_run/shell.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:x2_fwupdate/errors/errors.dart';
 import 'package:x2_fwupdate/models/update_error.dart';
@@ -80,9 +82,18 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     return process;
   }
 
-  Future<Process> executeDfuUtil(String tag) async {
+  Future<Process> executeDfuUtil(String tag, String version) async {
+    // Check/get latest firmware version
+
     double previousPercentage = state.progress;
 
+    // Replace 1.3.6 with the local version
+    // Possible vulnerability: if the string stored in the website was
+    //  manipulated to create a full string to a malicous piece of firmware on
+    //  the target computer then it is possible that an attacker could update
+    //  the X2's firmware with a malicous firmware.
+    // Example: "./assets/firmware/X2-$version.dfu" >
+    //  "./assets/firmware/X2-my-malicous-firmware.dfu"
     Process process = await Process.start('./assets/util/dfu-util$tag', [
       '-d',
       '0x16D0:0x0CC4,0x0483:0xdf11',
@@ -91,7 +102,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
       '-s',
       '0x08000000:leave',
       '-D',
-      './assets/firmware/X2-1.3.6.dfu'
+      './assets/firmware/X2-$version.dfu'
     ]);
 
     // Check each outputted line for percentage
@@ -110,7 +121,78 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     return process;
   }
 
+  // Check local firmware version and update if latest is different
+  Future<String> _getLatestFirmware() async {
+    late String latestVersion;
+    late String localVersion;
+
+    // Get local version
+    final String path = 'assets/firmware/X2_fw_ver.txt';
+    final File file = File(path);
+
+    localVersion = await file.readAsString();
+
+    print('Local version: "$localVersion"');
+
+    // Get latest version
+    final url = Uri.https('aon2.co.uk', 'files/firmware/X2_fw_ver.txt');
+
+    final response = await http.get(url);
+
+    // TODO: add some sort of notification for user
+    if (response.statusCode >= 400) {
+      print(
+          'Failed to get latest version with status code "${response.statusCode}');
+      print('Reverting to previous version...');
+      return localVersion;
+    } else {
+      // Only get here if we received something
+      latestVersion = response.body;
+
+      print('Latest version: "$latestVersion"');
+    }
+
+    // TODO: implement some sort of parser for software versions rather than check difference
+    // Download the latest version and update the local version value
+    if (latestVersion != localVersion) {
+      // TODO: figure out why its not downloading (parameters too specific/wrong?)
+      // Download firmware from AON2
+      final task = DownloadTask(
+        url: 'https://aon2.co.uk/files/firmware',
+        filename: 'X2_fw_ver.txt',
+        directory: 'assets/firmware',
+        updates: Updates.statusAndProgress,
+      );
+      final result = await FileDownloader().download(
+        task,
+        onProgress: (progress) => print('Progress: ${progress * 100}%'),
+        onStatus: (status) => print(
+          'Status: $status',
+        ),
+      );
+
+      if (result.status == TaskStatus.complete)
+        print('Success!'); // Remove old version
+      else if (result.status == TaskStatus.canceled)
+        print('Download was canceled');
+      else if (result.status == TaskStatus.paused)
+        print('Download was paused');
+      else
+        print('Download not successful');
+
+      file.writeAsString(latestVersion);
+      localVersion = latestVersion;
+    }
+
+    return localVersion;
+  }
+
   void executeUpdate() async {
+    // Get latest firmware version (preparing screen will still be shown here)
+    String version = await _getLatestFirmware();
+    version = version.trim();
+    print('Updating firmware to version "$version"...');
+
     state = UpdateStatus(
         error: state.error, progress: state.progress, screen: 'update-working');
 
@@ -121,11 +203,12 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
 
     if (Platform.isLinux) {
       await Future.delayed(Duration(seconds: 2), () {});
-      process = await executeDfuUtil('-linux');
+      process = await executeDfuUtil('-linux', version);
+      // process = await testUpdate();
     } else if (Platform.isMacOS) {
       await Future.delayed(Duration(seconds: 5), () {});
 
-      process = await executeDfuUtil('-mac');
+      process = await executeDfuUtil('-mac', version);
     } else if (Platform.isWindows) {
       await Future.delayed(Duration(seconds: 5), () {});
 
@@ -138,7 +221,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
         return;
       }
 
-      process = await executeDfuUtil('.exe');
+      process = await executeDfuUtil('.exe', version);
     } else {
       print('Incompatable platform');
       process = await Process.start('echo', ['Incompatable', 'platform']);
@@ -150,7 +233,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     }
 
     // Ensure dfu-util exits successfully
-    if (await process!.exitCode != 0) {
+    if (await process.exitCode != 0) {
       print('Failed to complete update util');
       state = UpdateStatus(
         error:
