@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:x2_fwupdate/providers/release_notes_provider.dart';
 
 import 'package:x2_fwupdate/widgets/buttons.dart';
 import 'package:x2_fwupdate/widgets/device_list.dart';
+import 'package:x2_fwupdate/widgets/release_notes.dart';
 
 class DeviceScreen extends ConsumerWidget {
   const DeviceScreen({super.key});
@@ -65,6 +67,17 @@ class DeviceScreen extends ConsumerWidget {
                 Image.asset(
                   'assets/images/aon2-logo-white.png',
                   width: 200,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    ref.read(releaseNotesProvider.notifier).getReleaseNotes();
+
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => ReleaseNotes(),
+                    );
+                  },
+                  child: Text('Release Notes'),
                 ),
                 Text('Copyright AON2'),
               ],

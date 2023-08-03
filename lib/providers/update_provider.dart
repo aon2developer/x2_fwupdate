@@ -4,7 +4,6 @@ import 'package:background_downloader/background_downloader.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:process_run/shell.dart';
-import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
 import 'package:x2_fwupdate/errors/errors.dart';
@@ -122,16 +121,10 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     return process;
   }
 
-  // Check local firmware version and update if latest is different
   Future<String> _getLatestFirmware() async {
     // Download firmware from aon2.co.uk
     final task = DownloadTask(
-      // TODO: rename firmware as to not signify its version
       url: 'https://aon2.co.uk/files/firmware/X2.dfu',
-      // Find directory of assets or start using some sort of temp dir
-      // Once the firmware is installed, the user doesn't need it on their
-      //  device so it can be deleted.
-      // TODO: use temp direcotry for installing firmware and delete after use
       baseDirectory: BaseDirectory.temporary,
       filename: 'X2.dfu',
       updates: Updates.statusAndProgress,
