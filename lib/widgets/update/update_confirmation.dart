@@ -1,86 +1,60 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:process_run/shell.dart';
+import 'package:x2_fwupdate/providers/selected_device_provider.dart';
+import 'package:x2_fwupdate/providers/update_provider.dart';
 
 import 'package:x2_fwupdate/screens/update_screen.dart';
 
-class UpdateConfirmation extends StatelessWidget {
+class UpdateConfirmation extends ConsumerStatefulWidget {
   UpdateConfirmation({required this.selectedDevice, super.key});
 
+  final shell = Shell(throwOnError: false);
   final SerialPort selectedDevice;
-  final shell = Shell();
-
-  Future<bool> _updateDevice(SerialPort selectedDevice) async {
-    Future<List<ProcessResult>> updateResult;
-
-    print('Updating ${selectedDevice.description}...');
-
-    updateResult = shell.run('./assets/util/update.sh');
-
-    // // Artificial success until X2 is fixed
-    // updateResult = shell.run('''
-
-    //   echo "Pretending to update"
-    //   echo "Done!"
-
-    // ''');
-
-    print(updateResult);
-
-    return false;
-  }
 
   @override
+  ConsumerState<UpdateConfirmation> createState() => _UpdateConfirmationState();
+}
+
+class _UpdateConfirmationState extends ConsumerState<UpdateConfirmation> {
+  @override
   Widget build(BuildContext context) {
-    Future<bool> _updateSuccessful;
+    SerialPort device = widget.selectedDevice;
 
     return AlertDialog(
       title: Text(
         'Are you sure that you want to update this device?',
-        style: Theme.of(context).textTheme.titleLarge,
+        style: Theme.of(context).textTheme.titleSmall,
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             'Device information',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           SizedBox(
-            height: 6,
+            height: 4,
           ),
           Text(
-            'Name: ${selectedDevice.description}',
+            'Name: ${device.productName}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           SizedBox(
             height: 4,
           ),
           Text(
-            'Manufacturer: ${selectedDevice.manufacturer}',
+            'Manufacturer: ${device.manufacturer}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           SizedBox(
             height: 4,
           ),
           Text(
-            'Serial Number: ${selectedDevice.serialNumber}',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          SizedBox(
-            height: 4,
-          ),
-          Text(
-            'Product ID: ${selectedDevice.productId}',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          SizedBox(
-            height: 4,
-          ),
-          Text(
-            'Vendor ID: ${selectedDevice.vendorId}',
+            'Serial Number: ${device.serialNumber}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ],
@@ -94,10 +68,8 @@ class UpdateConfirmation extends StatelessWidget {
           child: Text('No, cancel.'),
         ),
         TextButton(
+          // Go to update screen and begin update
           onPressed: () {
-            print('Start update'); // execute start update
-            _updateSuccessful = _updateDevice(selectedDevice);
-            print(_updateSuccessful);
             Navigator.pop(context);
             Navigator.push(
               context,
@@ -105,6 +77,8 @@ class UpdateConfirmation extends StatelessWidget {
                 builder: (ctx) => UpdateScreen(),
               ),
             );
+            ref.read(selectedDeviceProvider.notifier).selectDevice(device);
+            ref.read(updateProvider.notifier).updateDevice(device);
           },
           child: Text('Yes, update!'),
         ),

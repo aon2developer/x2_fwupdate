@@ -8,7 +8,6 @@ final theme = ThemeData(
     seedColor: Color.fromARGB(255, 69, 60, 49),
     brightness: Brightness.dark,
   ),
-  // TODO: configure text colors
   textTheme: const TextTheme(
     titleLarge: TextStyle(
       fontSize: 58,
@@ -18,6 +17,10 @@ final theme = ThemeData(
     ),
     titleSmall: TextStyle(
       fontSize: 24,
+    ),
+    bodyLarge: TextStyle(
+      color: Colors.grey,
+      fontSize: 22,
     ),
     bodyMedium: TextStyle(
       color: Colors.grey,
