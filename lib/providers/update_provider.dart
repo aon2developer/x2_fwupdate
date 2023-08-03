@@ -5,6 +5,7 @@ import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:process_run/shell.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 import 'package:x2_fwupdate/errors/errors.dart';
 import 'package:x2_fwupdate/models/update_error.dart';
@@ -82,7 +83,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     return process;
   }
 
-  Future<Process> executeDfuUtil(String tag, String version) async {
+  Future<Process> executeDfuUtil(String tag, String dir) async {
     // Check/get latest firmware version
 
     double previousPercentage = state.progress;
@@ -102,7 +103,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
       '-s',
       '0x08000000:leave',
       '-D',
-      './assets/firmware/X2-$version.dfu'
+      '$dir'
     ]);
 
     // Check each outputted line for percentage
@@ -123,75 +124,48 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
 
   // Check local firmware version and update if latest is different
   Future<String> _getLatestFirmware() async {
-    late String latestVersion;
-    late String localVersion;
+    // Download firmware from aon2.co.uk
+    final task = DownloadTask(
+      // TODO: rename firmware as to not signify its version
+      url: 'https://aon2.co.uk/files/firmware/X2.dfu',
+      // Find directory of assets or start using some sort of temp dir
+      // Once the firmware is installed, the user doesn't need it on their
+      //  device so it can be deleted.
+      // TODO: use temp direcotry for installing firmware and delete after use
+      baseDirectory: BaseDirectory.temporary,
+      filename: 'X2.dfu',
+      updates: Updates.statusAndProgress,
+    );
 
-    // Get local version
-    final String path = 'assets/firmware/X2_fw_ver.txt';
-    final File file = File(path);
+    // TODO: get directory from task object
+    final Directory tempDir = await getTemporaryDirectory();
+    final String dir = '${tempDir.path}/${task.filename}';
+    print('The file direcotry is "$dir"');
 
-    localVersion = await file.readAsString();
+    final result = await FileDownloader().download(
+      task,
+      // TODO: for debugging; remove once done
+      onProgress: (progress) => print('Progress: ${progress * 100}%'),
+      onStatus: (status) => print(
+        'Status: $status',
+      ),
+    );
 
-    print('Local version: "$localVersion"');
+    if (result.status == TaskStatus.complete) {
+      print('Success!');
+      print('Saved to "$dir"');
+    } else
+      // TODO: add some sort of notification for user and cancel update
+      print('Download not successful');
 
-    // Get latest version
-    final url = Uri.https('aon2.co.uk', 'files/firmware/X2_fw_ver.txt');
-
-    final response = await http.get(url);
-
-    // TODO: add some sort of notification for user
-    if (response.statusCode >= 400) {
-      print(
-          'Failed to get latest version with status code "${response.statusCode}');
-      print('Reverting to previous version...');
-      return localVersion;
-    } else {
-      // Only get here if we received something
-      latestVersion = response.body;
-
-      print('Latest version: "$latestVersion"');
-    }
-
-    // TODO: implement some sort of parser for software versions rather than check difference
-    // Download the latest version and update the local version value
-    if (latestVersion != localVersion) {
-      // TODO: figure out why its not downloading (parameters too specific/wrong?)
-      // Download firmware from AON2
-      final task = DownloadTask(
-        url: 'https://aon2.co.uk/files/firmware',
-        filename: 'X2_fw_ver.txt',
-        directory: 'assets/firmware',
-        updates: Updates.statusAndProgress,
-      );
-      final result = await FileDownloader().download(
-        task,
-        onProgress: (progress) => print('Progress: ${progress * 100}%'),
-        onStatus: (status) => print(
-          'Status: $status',
-        ),
-      );
-
-      if (result.status == TaskStatus.complete)
-        print('Success!'); // Remove old version
-      else if (result.status == TaskStatus.canceled)
-        print('Download was canceled');
-      else if (result.status == TaskStatus.paused)
-        print('Download was paused');
-      else
-        print('Download not successful');
-
-      file.writeAsString(latestVersion);
-      localVersion = latestVersion;
-    }
-
-    return localVersion;
+    return dir;
   }
 
+  // TODO: rename to something more descriptive
   void executeUpdate() async {
     // Get latest firmware version (preparing screen will still be shown here)
-    String version = await _getLatestFirmware();
-    version = version.trim();
-    print('Updating firmware to version "$version"...');
+    String dir = await _getLatestFirmware();
+    print('Firmware location: "$dir"');
 
     state = UpdateStatus(
         error: state.error, progress: state.progress, screen: 'update-working');
@@ -203,12 +177,12 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
 
     if (Platform.isLinux) {
       await Future.delayed(Duration(seconds: 2), () {});
-      process = await executeDfuUtil('-linux', version);
+      process = await executeDfuUtil('-linux', dir);
       // process = await testUpdate();
     } else if (Platform.isMacOS) {
       await Future.delayed(Duration(seconds: 5), () {});
 
-      process = await executeDfuUtil('-mac', version);
+      process = await executeDfuUtil('-mac', dir);
     } else if (Platform.isWindows) {
       await Future.delayed(Duration(seconds: 5), () {});
 
@@ -221,7 +195,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
         return;
       }
 
-      process = await executeDfuUtil('.exe', version);
+      process = await executeDfuUtil('.exe', dir);
     } else {
       print('Incompatable platform');
       process = await Process.start('echo', ['Incompatable', 'platform']);
@@ -250,8 +224,13 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
         error: state.error,
         progress: state.progress,
         screen: 'update-complete');
+
+    // TODO: delete firmware on device
+    final File file = File(dir);
+    file.delete();
   }
 
+  // TODO: rename to something like enable boot loader
   void updateDevice(SerialPort device) async {
     state = UpdateStatus(
         error: state.error,

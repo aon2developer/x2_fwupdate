@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:x2_fwupdate/providers/devices_provider.dart';
 import 'package:x2_fwupdate/providers/update_provider.dart';
 import 'package:x2_fwupdate/screens/update_screen.dart';
-import 'package:x2_fwupdate/widgets/update/update_confirmation.dart';
 
 class Buttons extends ConsumerStatefulWidget {
   Buttons({super.key});
@@ -49,6 +48,7 @@ class _ButtonsState extends ConsumerState<Buttons> {
                   _opacity = 1.0;
                 });
 
+                // Check if boot loader mode is enabled or is 'ready'
                 String x2State =
                     await ref.read(devicesProvider.notifier).findX2Devices();
 
