@@ -78,7 +78,7 @@ class _UpdateConfirmationState extends ConsumerState<UpdateConfirmation> {
               ),
             );
             ref.read(selectedDeviceProvider.notifier).selectDevice(device);
-            ref.read(updateProvider.notifier).updateDevice(device);
+            ref.read(updateProvider.notifier).prepareDevice(device);
           },
           child: Text('Yes, update!'),
         ),

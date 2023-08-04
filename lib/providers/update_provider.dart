@@ -4,7 +4,6 @@ import 'package:background_downloader/background_downloader.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:process_run/shell.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'package:x2_fwupdate/errors/errors.dart';
 import 'package:x2_fwupdate/models/update_error.dart';
@@ -55,6 +54,8 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
 
   // TODO: remove on release
   Future<Process> testUpdate() async {
+    _getLatestFirmware();
+
     print('Pretending to activate bootloader mode...');
 
     print('Sleeping...');
@@ -130,34 +131,34 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
       updates: Updates.statusAndProgress,
     );
 
-    // TODO: get directory from task object
-    final Directory tempDir = await getTemporaryDirectory();
-    final String dir = '${tempDir.path}/${task.filename}';
-    print('The file direcotry is "$dir"');
+    final result = await FileDownloader().download(task);
 
-    final result = await FileDownloader().download(
-      task,
-      // TODO: for debugging; remove once done
-      onProgress: (progress) => print('Progress: ${progress * 100}%'),
-      onStatus: (status) => print(
-        'Status: $status',
-      ),
-    );
+    final String dir = await result.task.filePath();
 
     if (result.status == TaskStatus.complete) {
       print('Success!');
       print('Saved to "$dir"');
-    } else
-      // TODO: add some sort of notification for user and cancel update
+    } else {
       print('Download not successful');
+
+      return 'null';
+    }
 
     return dir;
   }
 
-  // TODO: rename to something more descriptive
-  void executeUpdate() async {
+  void installFirmware() async {
     // Get latest firmware version (preparing screen will still be shown here)
     String dir = await _getLatestFirmware();
+
+    if (dir == 'null') {
+      state = UpdateStatus(
+        error: UpdateError(code: 1, type: ErrorType.noInternet),
+        progress: -1.0,
+      );
+      return;
+    }
+
     print('Firmware location: "$dir"');
 
     state = UpdateStatus(
@@ -218,13 +219,11 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
         progress: state.progress,
         screen: 'update-complete');
 
-    // TODO: delete firmware on device
     final File file = File(dir);
     file.delete();
   }
 
-  // TODO: rename to something like enable boot loader
-  void updateDevice(SerialPort device) async {
+  void prepareDevice(SerialPort device) async {
     state = UpdateStatus(
         error: state.error,
         progress: state.progress,
@@ -241,7 +240,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     device.config.stopBits = 1;
     device.config = config;
 
-    executeUpdate();
+    installFirmware();
   }
 }
 

@@ -140,16 +140,14 @@ class _DeviceListState extends ConsumerState<DeviceList> {
 
       height: 400,
       // TODO: make scroll if content does not fit in available space
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            for (final device in content)
-              Builder(builder: (context) {
-                print('Device(s) found');
-                return device;
-              }),
-          ],
-        ),
+      child: Column(
+        children: [
+          for (final device in content)
+            Builder(builder: (context) {
+              print('Device(s) found');
+              return device;
+            }),
+        ],
       ),
     );
   }

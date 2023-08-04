@@ -86,7 +86,7 @@ class _ButtonsState extends ConsumerState<Buttons> {
                               ),
                             );
                             print('Starting update from boot loader mode!');
-                            ref.read(updateProvider.notifier).executeUpdate();
+                            ref.read(updateProvider.notifier).installFirmware();
                           },
                           child: Text('Yes, update!'),
                         ),

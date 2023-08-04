@@ -5,6 +5,7 @@ enum ErrorType {
   update,
   noDriver,
   incompatablePlatform,
+  noInternet,
 }
 
 Map<ErrorType, ErrorMessage> errorContent = {
@@ -26,5 +27,12 @@ Map<ErrorType, ErrorMessage> errorContent = {
       'Return here when you\'re done!',
     ],
     link: 'https://www.aon2.co.uk/files/drivers/X2DriverPackage.zip',
+  ),
+  ErrorType.noInternet: ErrorMessage(
+    title: 'Internet connection required',
+    desc: 'You require an internet connection to carry out this update.',
+    help: [
+      'Please ensure that you have a stable internet connection and try again...'
+    ],
   ),
 };
