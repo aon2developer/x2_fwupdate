@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:x2_fwupdate/models/error_message.dart';
+import 'package:x2_fwupdate/providers/devices_provider.dart';
 import 'package:x2_fwupdate/providers/update_provider.dart';
 import 'package:x2_fwupdate/widgets/error_message_widget.dart';
 
@@ -24,10 +25,18 @@ class UpdateErrorMessage extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton.icon(
-                onPressed: () {
+                onPressed: () async {
+                  // reset update state
                   ref.read(updateProvider.notifier).resetErrors();
-                  // TODO: check for boot loader mode
-                  ref.read(updateProvider.notifier).updateDevice(device);
+
+                  // check for boot loader mode
+                  final deviceStatus =
+                      await ref.read(devicesProvider.notifier).findX2Devices();
+
+                  if (deviceStatus == 'bootloader')
+                    ref.read(updateProvider.notifier).updateX2Device(null);
+                  else
+                    ref.read(updateProvider.notifier).updateX2Device(device);
                 },
                 icon: Icon(
                   Icons.refresh,

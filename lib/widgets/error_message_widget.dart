@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:x2_fwupdate/models/error_message.dart';
 
-// TODO: turn into popup rather than enture new screen
 class ErrorMessageWidget extends StatelessWidget {
   ErrorMessageWidget({super.key, required this.error});
 

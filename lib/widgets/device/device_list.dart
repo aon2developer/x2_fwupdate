@@ -130,27 +130,9 @@ class _DeviceListState extends ConsumerState<DeviceList> {
       ];
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[850],
-      ),
-      padding: EdgeInsets.all(4),
-      margin: EdgeInsets.all(12),
-      // TODO: make use of all available space
-
-      height: 400,
-      // TODO: make scroll if content does not fit in available space
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            for (final device in content)
-              Builder(builder: (context) {
-                print('Device(s) found');
-                return device;
-              }),
-          ],
-        ),
-      ),
+    return ListView.builder(
+      itemCount: content.length,
+      itemBuilder: (context, index) => content[index],
     );
   }
 }
