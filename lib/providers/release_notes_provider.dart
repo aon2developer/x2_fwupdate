@@ -5,6 +5,7 @@ class ReleaseNotesNotifier extends StateNotifier<String> {
   ReleaseNotesNotifier() : super('Unable to get newest firmware version...');
 
   Future<bool> getReleaseNotes() async {
+    // TODO: check that the url is correct before release
     final url = Uri.https('aon2.co.uk', 'files/firmware/X2_fw_ver.txt');
 
     final response = await http.get(url);

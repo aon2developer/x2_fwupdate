@@ -23,6 +23,9 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
           ),
         );
 
+  /// Resets update errors
+  ///
+  /// NOTE: no checking is in place to check that a driver is installed
   void resetErrors() {
     state = UpdateStatus(
       progress: 0.0,
@@ -35,7 +38,9 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     );
   }
 
-  // Takes a string and returns the percentage, if found, as a decimal
+  /// Takes a string and returns the percentage as a decimal
+  ///
+  /// If a percentage cannot be found, returns null
   double? parsePercentage(String line) {
     // Find percentage value
     RegExp _percentageValueSearch = RegExp(r'(\d{1,})(?=%)');
@@ -83,12 +88,10 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     return process;
   }
 
+  /// Executes dfu-util given a util tag and firmware directory
   Future<Process> executeDfuUtil(String tag, String dir) async {
-    // Check/get latest firmware version
-
     double previousPercentage = state.progress;
 
-    // Replace 1.3.6 with the local version
     // Possible vulnerability: if the string stored in the website was
     //  manipulated to create a full string to a malicous piece of firmware on
     //  the target computer then it is possible that an attacker could update
@@ -122,8 +125,10 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     return process;
   }
 
+  /// Download firmware from aon2.co.uk
+  ///
+  /// Will return directory of downloaded firmware otherwise 'null'
   Future<String> _getLatestFirmware() async {
-    // Download firmware from aon2.co.uk
     final task = DownloadTask(
       url: 'https://aon2.co.uk/files/firmware/X2.dfu',
       baseDirectory: BaseDirectory.temporary,
@@ -147,8 +152,12 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     return dir;
   }
 
+  /// Will install firmware to an X2 device depending on Platform
+  ///
+  /// Requires the internet
+  ///
+  /// Will load a firmware package into temporary device storage
   void installFirmware() async {
-    // Get latest firmware version (preparing screen will still be shown here)
     String dir = await _getLatestFirmware();
 
     if (dir == 'null') {
@@ -166,13 +175,10 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
 
     Process? process;
 
-    // Wait for boot loader mode to activate then begin update depending on
-    //  platform
-
+    // Execute dfu-util depending on platform
     if (Platform.isLinux) {
       await Future.delayed(Duration(seconds: 2), () {});
       process = await executeDfuUtil('-linux', dir);
-      // process = await testUpdate();
     } else if (Platform.isMacOS) {
       await Future.delayed(Duration(seconds: 5), () {});
 
@@ -219,10 +225,14 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
         progress: state.progress,
         screen: 'update-complete');
 
+    // Remove the downloaded firmware
     final File file = File(dir);
     file.delete();
   }
 
+  /// Will prepare an X2 to be updated
+  ///
+  /// Executes a port knock
   void prepareDevice(SerialPort device) async {
     state = UpdateStatus(
         error: state.error,

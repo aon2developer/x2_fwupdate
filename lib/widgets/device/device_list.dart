@@ -130,7 +130,6 @@ class _DeviceListState extends ConsumerState<DeviceList> {
       ];
     }
 
-    // TODO: make scrollable
     return ListView.builder(
       itemCount: content.length,
       itemBuilder: (context, index) => content[index],

@@ -5,6 +5,9 @@ import 'package:quick_usb/quick_usb.dart';
 class AvailableDevicesNotifier extends StateNotifier<List<SerialPort>> {
   AvailableDevicesNotifier() : super([]);
 
+  /// Finds available X2 devices connecting to a computer
+  ///
+  /// If an X2 device is detected in boot loader mode, returns 'ready'
   Future<String> findX2Devices() async {
     final availablePorts = SerialPort.availablePorts;
     List<SerialPort> filteredPorts = [];

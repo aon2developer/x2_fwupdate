@@ -6,7 +6,6 @@ import 'package:x2_fwupdate/widgets/release_notes.dart';
 class Footer extends ConsumerWidget {
   Footer({super.key});
 
-  // TODO: push to bottom
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Align(
