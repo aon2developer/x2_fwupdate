@@ -26,6 +26,7 @@ class UpdateErrorMessage extends ConsumerWidget {
               ElevatedButton.icon(
                 onPressed: () {
                   ref.read(updateProvider.notifier).resetErrors();
+                  // TODO: check for boot loader mode
                   ref.read(updateProvider.notifier).updateDevice(device);
                 },
                 icon: Icon(

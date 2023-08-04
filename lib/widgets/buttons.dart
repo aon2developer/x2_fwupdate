@@ -47,6 +47,7 @@ class _ButtonsState extends ConsumerState<Buttons> {
                   _opacity = 1.0;
                 });
 
+                // Check if boot loader mode is enabled or is 'ready'
                 String x2State =
                     await ref.read(devicesProvider.notifier).findX2Devices();
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:x2_fwupdate/providers/devices_provider.dart';
 import 'package:x2_fwupdate/providers/update_provider.dart';
 
 class UpdateComplete extends ConsumerWidget {
@@ -36,6 +37,7 @@ class UpdateComplete extends ConsumerWidget {
         ElevatedButton.icon(
           onPressed: () {
             ref.read(updateProvider.notifier).resetErrors();
+            ref.read(devicesProvider.notifier).findX2Devices();
             Navigator.pop(context);
           },
           icon: Icon(
