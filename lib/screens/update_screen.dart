@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:x2_fwupdate/errors/errors.dart';
 import 'package:x2_fwupdate/providers/selected_device_provider.dart';
 import 'package:x2_fwupdate/providers/update_provider.dart';
+import 'package:x2_fwupdate/widgets/footer.dart';
 import 'package:x2_fwupdate/widgets/update/preparing_update.dart';
 import 'package:x2_fwupdate/widgets/update/update_complete.dart';
 import 'package:x2_fwupdate/widgets/update/update_error_message.dart';
@@ -43,7 +44,8 @@ class UpdateScreen extends ConsumerWidget {
               UpdateErrorMessage(
                 error: errorContent[ErrorType.unknown]!,
                 device: device,
-              )
+              ),
+            Footer(),
           ],
         ),
       ),

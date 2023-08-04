@@ -6,15 +6,20 @@ import 'package:x2_fwupdate/widgets/buttons.dart';
 import 'package:x2_fwupdate/widgets/device_list.dart';
 import 'package:x2_fwupdate/widgets/release_notes.dart';
 
-class DeviceScreen extends ConsumerWidget {
+class DeviceScreen extends ConsumerStatefulWidget {
   const DeviceScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DeviceScreen> createState() => _DeviceScreenState();
+}
+
+class _DeviceScreenState extends ConsumerState<DeviceScreen> {
+  @override
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(color: Theme.of(context).primaryColorDark),
       padding: EdgeInsets.all(24),
-      width: double.infinity, // TODO: make use of entire horizonal space
+      width: double.infinity,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

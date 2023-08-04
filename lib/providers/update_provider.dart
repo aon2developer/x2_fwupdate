@@ -204,7 +204,7 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
       print('Failed to complete update util');
       state = UpdateStatus(
         error:
-            UpdateError(code: await process!.exitCode, type: ErrorType.update),
+            UpdateError(code: await process.exitCode, type: ErrorType.update),
         progress: 0,
       );
       return;

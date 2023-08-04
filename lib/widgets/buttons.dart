@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -108,29 +107,6 @@ class _ButtonsState extends ConsumerState<Buttons> {
                     ),
               ),
             ),
-            SizedBox(
-              height: 12,
-            ),
-            ElevatedButton.icon(
-              onPressed: () => exit(0), // TODO: add graceful exit
-              icon: Icon(
-                Icons.exit_to_app,
-                size: 26,
-              ),
-              label: Text(
-                'Exit',
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: Colors.white,
-                      fontSize: 26,
-                    ),
-              ),
-              style: ButtonStyle(
-                backgroundColor: MaterialStatePropertyAll(
-                  Theme.of(context)
-                      .primaryColorDark, // TODO: match with background color
-                ),
-              ),
-            )
           ],
         ),
       ],

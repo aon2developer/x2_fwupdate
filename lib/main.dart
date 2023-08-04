@@ -7,6 +7,7 @@ final theme = ThemeData(
   colorScheme: ColorScheme.fromSeed(
     seedColor: Color.fromARGB(255, 69, 60, 49),
     brightness: Brightness.dark,
+    background: Colors.black,
   ),
   textTheme: const TextTheme(
     titleLarge: TextStyle(
