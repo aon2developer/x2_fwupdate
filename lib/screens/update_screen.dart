@@ -19,15 +19,14 @@ class UpdateScreen extends ConsumerWidget {
     SerialPort device = ref.watch(selectedDeviceProvider);
     final updateState = ref.watch(updateProvider);
 
-    return Container(
-      decoration: BoxDecoration(color: Theme.of(context).primaryColorDark),
-      padding: EdgeInsets.all(24),
-      width: double.infinity,
-      alignment: Alignment.center,
-      child: SingleChildScrollView(
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // Dummy container to move update message to center
+            Container(),
             // Display different widget depending on updateState.screen
             if (updateState.error.code != 0)
               UpdateErrorMessage(
