@@ -13,16 +13,15 @@ class DeviceScreen extends ConsumerStatefulWidget {
 }
 
 class _DeviceScreenState extends ConsumerState<DeviceScreen> {
+  List<int> myNumbers = [1, 2, 3, 4, 5];
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(color: Theme.of(context).primaryColorDark),
-      padding: EdgeInsets.all(24),
-      width: double.infinity,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(children: [
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -59,11 +58,11 @@ class _DeviceScreenState extends ConsumerState<DeviceScreen> {
             SizedBox(
               height: 12,
             ),
-            DeviceList(),
-          ]),
-          Footer(),
-        ],
-      ),
+          ],
+        ),
+        Expanded(child: DeviceList()),
+        Footer(),
+      ],
     );
   }
 }

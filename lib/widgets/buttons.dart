@@ -20,6 +20,7 @@ class _ButtonsState extends ConsumerState<Buttons> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        // "refreshed" message
         AnimatedOpacity(
           // When pressed, animate from 100 to 0
           opacity: _opacity,
@@ -47,7 +48,7 @@ class _ButtonsState extends ConsumerState<Buttons> {
                   _opacity = 1.0;
                 });
 
-                // Check if boot loader mode is enabled or is 'ready'
+                // Check if boot loader mode is enabled
                 String x2State =
                     await ref.read(devicesProvider.notifier).findX2Devices();
 

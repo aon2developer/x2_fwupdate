@@ -38,7 +38,10 @@ class App extends StatelessWidget {
     return MaterialApp(
       theme: theme,
       home: Scaffold(
-        body: DeviceScreen(),
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: DeviceScreen(),
+        ),
       ),
     );
   }
