@@ -8,6 +8,8 @@ class AvailableDevicesNotifier extends StateNotifier<List<SerialPort>> {
   /// Finds available X2 devices connecting to a computer
   ///
   /// If an X2 device is detected in boot loader mode, returns 'ready'
+  ///
+  /// Other wise, will return 'prepare' and set provider to list of devices
   Future<String> findX2Devices() async {
     final availablePorts = SerialPort.availablePorts;
     List<SerialPort> filteredPorts = [];
@@ -32,7 +34,7 @@ class AvailableDevicesNotifier extends StateNotifier<List<SerialPort>> {
         if (device.productId == 57105 && device.vendorId == 1155) {
           print('X2 has been detected to be in BOOTLOADER MODE!');
           // If boot loader mode is activated, skip preperation
-          return 'ready';
+          return 'bootloader';
         }
       }
     }

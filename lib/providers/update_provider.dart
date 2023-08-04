@@ -23,6 +23,8 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
           ),
         );
 
+  /// UTILS ///
+
   /// Resets update errors
   ///
   /// NOTE: no checking is in place to check that a driver is installed
@@ -57,9 +59,52 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     }
   }
 
+  /// Updates an X2 device
+  ///
+  /// Pass null to start update from boot loader mode
+  ///
+  /// This function also manages screen state
+  void updateX2Device(SerialPort? device) async {
+    // Display the preparing screen
+    state = UpdateStatus(
+        error: state.error,
+        progress: state.progress,
+        screen: 'preparing-update');
+
+    // TODO: check device state here
+    // Put X2 into boot loader mode
+    if (device != null) await prepareDevice(device);
+
+    // Download latest firmware
+    String dir = await getLatestFirmware();
+    if (dir == 'null') {
+      state = UpdateStatus(
+        error: UpdateError(code: 1, type: ErrorType.noInternet),
+        progress: -1.0,
+      );
+      return;
+    }
+    print('Firmware location: "$dir"');
+
+    state = UpdateStatus(
+        error: state.error, progress: state.progress, screen: 'update-working');
+
+    // Install latest firmware
+    await installFirmware(dir);
+
+    // start complete screen
+    // only gets here when passed all error tests and have 'awaited' all processes
+    state = UpdateStatus(
+        error: state.error,
+        progress: state.progress,
+        screen: 'update-complete');
+  }
+
+  /// UPDATE ///
+
   // TODO: remove on release
   Future<Process> testUpdate() async {
-    _getLatestFirmware();
+    getLatestFirmware();
 
     print('Pretending to activate bootloader mode...');
 
@@ -86,6 +131,116 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
       previousPercentage = state.progress;
     }
     return process;
+  }
+
+  /// Will prepare an X2 to be updated
+  ///
+  /// Executes a port knock
+  Future<bool> prepareDevice(SerialPort device) async {
+    // Enable boot loader mode
+    device.openWrite();
+    var config = device.config;
+    config.baudRate = 1200;
+    device.config = config;
+    device.config.rts = 1;
+    device.config.dtr = 0;
+    device.config.bits = 8;
+    device.config.stopBits = 1;
+    device.config = config;
+
+    return true;
+  }
+
+  /// Download firmware from aon2.co.uk
+  ///
+  /// Will return directory of downloaded firmware otherwise 'null'
+  Future<String> getLatestFirmware() async {
+    final task = DownloadTask(
+      url: 'https://aon2.co.uk/files/firmware/X2.dfu',
+      baseDirectory: BaseDirectory.temporary,
+      filename: 'X2.dfu',
+      updates: Updates.statusAndProgress,
+    );
+
+    final result = await FileDownloader().download(task);
+
+    final String dir = await result.task.filePath();
+
+    if (result.status == TaskStatus.complete) {
+      print('Success!');
+      print('Saved to "$dir"');
+    } else {
+      print('Download not successful');
+
+      return 'null';
+    }
+
+    return dir;
+  }
+
+  /// Will install firmware to an X2 device depending on Platform
+  ///
+  /// Requires the internet
+  ///
+  /// Will load a firmware package into temporary device storage
+  Future<bool> installFirmware(String dir) async {
+    Process? process;
+
+    // Execute dfu-util depending on platform
+    // NOTE: a delay is added to ensure that boot loader mode is activated
+    if (Platform.isLinux) {
+      await Future.delayed(Duration(seconds: 2), () {});
+      process = await executeDfuUtil('-linux', dir);
+    } else if (Platform.isMacOS) {
+      await Future.delayed(Duration(seconds: 5), () {});
+
+      process = await executeDfuUtil('-mac', dir);
+    } else if (Platform.isWindows) {
+      await Future.delayed(Duration(seconds: 5), () {});
+
+      // Prompt user to ensure that they have installed the boot loader driver
+      if (!state.error.driverInstalled!) {
+        state = UpdateStatus(
+          error: UpdateError(code: 1, type: ErrorType.noDriver),
+          progress: -1.0,
+        );
+        final File file = File(dir);
+        file.delete();
+        return false;
+      }
+
+      process = await executeDfuUtil('.exe', dir);
+    } else {
+      print('Incompatable platform');
+      process = await Process.start('echo', ['Incompatable', 'platform']);
+      state = UpdateStatus(
+        error: UpdateError(code: 1, type: ErrorType.incompatablePlatform),
+        progress: 0,
+      );
+      final File file = File(dir);
+      file.delete();
+      return false;
+    }
+
+    // Ensure dfu-util exits successfully
+    if (await process.exitCode != 0) {
+      print('Failed to complete update util');
+      state = UpdateStatus(
+        error:
+            UpdateError(code: await process.exitCode, type: ErrorType.update),
+        progress: 0,
+      );
+      final File file = File(dir);
+      file.delete();
+      return false;
+    } else {
+      print('Update util done!');
+    }
+
+    // Remove the downloaded firmware from computer
+    final File file = File(dir);
+    file.delete();
+    return true;
   }
 
   /// Executes dfu-util given a util tag and firmware directory
@@ -123,134 +278,6 @@ class UpdateNotifier extends StateNotifier<UpdateStatus> {
     }
 
     return process;
-  }
-
-  /// Download firmware from aon2.co.uk
-  ///
-  /// Will return directory of downloaded firmware otherwise 'null'
-  Future<String> _getLatestFirmware() async {
-    final task = DownloadTask(
-      url: 'https://aon2.co.uk/files/firmware/X2.dfu',
-      baseDirectory: BaseDirectory.temporary,
-      filename: 'X2.dfu',
-      updates: Updates.statusAndProgress,
-    );
-
-    final result = await FileDownloader().download(task);
-
-    final String dir = await result.task.filePath();
-
-    if (result.status == TaskStatus.complete) {
-      print('Success!');
-      print('Saved to "$dir"');
-    } else {
-      print('Download not successful');
-
-      return 'null';
-    }
-
-    return dir;
-  }
-
-  /// Will install firmware to an X2 device depending on Platform
-  ///
-  /// Requires the internet
-  ///
-  /// Will load a firmware package into temporary device storage
-  void installFirmware() async {
-    String dir = await _getLatestFirmware();
-
-    if (dir == 'null') {
-      state = UpdateStatus(
-        error: UpdateError(code: 1, type: ErrorType.noInternet),
-        progress: -1.0,
-      );
-      return;
-    }
-
-    print('Firmware location: "$dir"');
-
-    state = UpdateStatus(
-        error: state.error, progress: state.progress, screen: 'update-working');
-
-    Process? process;
-
-    // Execute dfu-util depending on platform
-    if (Platform.isLinux) {
-      await Future.delayed(Duration(seconds: 2), () {});
-      process = await executeDfuUtil('-linux', dir);
-    } else if (Platform.isMacOS) {
-      await Future.delayed(Duration(seconds: 5), () {});
-
-      process = await executeDfuUtil('-mac', dir);
-    } else if (Platform.isWindows) {
-      await Future.delayed(Duration(seconds: 5), () {});
-
-      // Prompt user to ensure that they have installed the boot loader driver
-      if (!state.error.driverInstalled!) {
-        state = UpdateStatus(
-          error: UpdateError(code: 1, type: ErrorType.noDriver),
-          progress: -1.0,
-        );
-        return;
-      }
-
-      process = await executeDfuUtil('.exe', dir);
-    } else {
-      print('Incompatable platform');
-      process = await Process.start('echo', ['Incompatable', 'platform']);
-      state = UpdateStatus(
-        error: UpdateError(code: 1, type: ErrorType.incompatablePlatform),
-        progress: 0,
-      );
-      return;
-    }
-
-    // Ensure dfu-util exits successfully
-    if (await process.exitCode != 0) {
-      print('Failed to complete update util');
-      state = UpdateStatus(
-        error:
-            UpdateError(code: await process.exitCode, type: ErrorType.update),
-        progress: 0,
-      );
-      return;
-    } else {
-      print('Update util done!');
-    }
-
-    // Only gets here when passed all error tests and have "awaited" all processes
-    state = UpdateStatus(
-        error: state.error,
-        progress: state.progress,
-        screen: 'update-complete');
-
-    // Remove the downloaded firmware
-    final File file = File(dir);
-    file.delete();
-  }
-
-  /// Will prepare an X2 to be updated
-  ///
-  /// Executes a port knock
-  void prepareDevice(SerialPort device) async {
-    state = UpdateStatus(
-        error: state.error,
-        progress: state.progress,
-        screen: 'preparing-update');
-
-    // Enable boot loader mode
-    device.openWrite();
-    var config = device.config;
-    config.baudRate = 1200;
-    device.config = config;
-    device.config.rts = 1;
-    device.config.dtr = 0;
-    device.config.bits = 8;
-    device.config.stopBits = 1;
-    device.config = config;
-
-    installFirmware();
   }
 }
 

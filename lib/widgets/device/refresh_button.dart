@@ -19,7 +19,7 @@ class _RefreshButtonState extends ConsumerState<RefreshButton> {
   Future<bool> _checkMode() async {
     String x2State = await ref.read(devicesProvider.notifier).findX2Devices();
 
-    if (x2State == 'ready') {
+    if (x2State == 'bootloader') {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -53,8 +53,9 @@ class _RefreshButtonState extends ConsumerState<RefreshButton> {
                     builder: (ctx) => UpdateScreen(),
                   ),
                 );
+                // Starts update from boot loader mode
                 print('Starting update from boot loader mode!');
-                ref.read(updateProvider.notifier).installFirmware();
+                ref.read(updateProvider.notifier).updateX2Device(null);
               },
               child: Text('Yes, update!'),
             ),

@@ -33,10 +33,10 @@ class UpdateErrorMessage extends ConsumerWidget {
                   final deviceStatus =
                       await ref.read(devicesProvider.notifier).findX2Devices();
 
-                  if (deviceStatus == 'ready')
-                    ref.read(updateProvider.notifier).installFirmware();
+                  if (deviceStatus == 'bootloader')
+                    ref.read(updateProvider.notifier).updateX2Device(null);
                   else
-                    ref.read(updateProvider.notifier).prepareDevice(device);
+                    ref.read(updateProvider.notifier).updateX2Device(device);
                 },
                 icon: Icon(
                   Icons.refresh,
